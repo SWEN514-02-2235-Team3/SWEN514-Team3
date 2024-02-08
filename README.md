@@ -1,2 +1,7 @@
 # swen514-team3-project
-Name pending :)
+Team name pending :)
+- Saranya Dadi
+- Greg Villafane
+- Jackson Murphy
+- Nick Grosskopf
+- Jin Moon
