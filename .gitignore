@@ -1,0 +1,23 @@
+# Node.js
+/node_modules
+npm-debug.log
+yarn-error.log
+/yarn.lock
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.pycachefile
+.env
+
+# JavaScript
+.DS_Store
+*.log
