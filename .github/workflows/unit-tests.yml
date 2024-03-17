@@ -27,7 +27,7 @@ jobs:
             region = "${var.region}"
             access_key = "${{ secrets.TF_PLAN_AWS_ACCESS_KEY }}"
             secret_key = "${{ secrets.TF_PLAN_AWS_SECRET_KEY }}"
-          }' >> terraform/aws_mock.tf
+          }' >> terraform/aws_provider.tf
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
