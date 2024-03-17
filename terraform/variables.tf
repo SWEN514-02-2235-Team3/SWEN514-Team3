@@ -13,8 +13,13 @@ variable "ssh_location" {
 }
 
 variable "availability_zone" {
-  description = "The AWS region where resources will be created"
+  description = "Availability zone"
   default     = "us-east-1a"
+}
+
+variable "region" {
+  description = "AWS Region"
+  default     = "us-east-1"
 }
 
 data "aws_ami" "selected" {
