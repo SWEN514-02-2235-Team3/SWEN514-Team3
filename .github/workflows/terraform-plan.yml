@@ -1,6 +1,8 @@
 name: Terraform Infrastructure Test
 run-name: Terraform Test (${{ github.actor }})
 on: [push]
+env:
+  PEM_FILENAME: swen_514_team3_key.pem
 jobs:
   terraform-test:
     runs-on: ubuntu-latest
@@ -10,9 +12,24 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Create .pem file from AWS_PEM_KEY secret
+        run: |
+          echo "${{ secrets.AWS_PEM_KEY }}" > terraform/$PEM_FILENAME
+          chmod 400 terraform/$PEM_FILENAME
+        shell: bash
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
+
       - name: Terraform Init
-        run: |
+        run: cd terraform/ && terraform init
+
+      - name: Terraform Validate
+        if: success() || failure()
+        run: cd terraform/ && terraform validate
+
+      - name: Terraform Plan
+        run: | 
           cd terraform/
-          terraform init
+          terraform plan -input=false -var "key_name=$PEM_FILENAME"
