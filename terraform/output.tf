@@ -1,7 +1,7 @@
 output "instance_ip_addr" {
-  value = aws_instance.my_server[*].private_ip
+  value = aws_instance.ec2[*].private_ip
 }
 
 output "instance_ip_addr_public" {
-  value = aws_instance.my_server[*].public_ip
+  value = aws_instance.ec2[*].public_ip
 }
