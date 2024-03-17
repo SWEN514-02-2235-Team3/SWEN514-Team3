@@ -29,8 +29,8 @@ jobs:
             region = "${var.region}"
             skip_credentials_validation = true
             skip_metadata_api_check     = true
-            access_key = "${{ env.AWS_ACCESS_KEY_ID }}"
-            secret_key = "${{ env.AWS_SECRET_ACCESS_KEY }}"
+            access_key                  = "AKIA47CRXH6B67LYT56Z"
+            secret_key                  = "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"
           }' >> terraform/aws_mock.tf
 
           cat terraform/aws_mock.tf
@@ -39,7 +39,7 @@ jobs:
         uses: hashicorp/setup-terraform@v2
 
       - run: terraform --version
-      
+
       - name: Terraform Init
         run: cd terraform/ && terraform init
 
