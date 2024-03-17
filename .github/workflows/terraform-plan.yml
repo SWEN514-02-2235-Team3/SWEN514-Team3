@@ -1,15 +1,13 @@
-name: Terraform Infrastructure Test
-run-name: Terraform Test (${{ github.actor }})
-on: [push]
+name: Unit Tests
+run-name: Running Unit Tests (${{ github.actor }})
+on:
+  push:
+    branches:
+      - '*'
 jobs:
   terraform-test:
+    name: Terraform Infrastructure
     runs-on: ubuntu-latest
-    environment: dev
-    permissions:
-      contents: read
-      pull-requests: write
-    env:
-      AWS_EC2_METADATA_DISABLED: ""
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -21,26 +19,13 @@ jobs:
         shell: bash
 
       - name: Setup aws provider
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.TF_PLAN_AWS_ACCESS_KEY }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_PLAN_AWS_SECRET_KEY }}
         shell: bash
         run: |
           echo 'provider "aws" {
             region = "${var.region}"
-            access_key = "$AWS_ACCESS_KEY_ID"
-            secret_key = "$AWS_SECRET_ACCESS_KEY"
+            access_key = "${{ secrets.TF_PLAN_AWS_ACCESS_KEY }}"
+            secret_key = "${{ secrets.TF_PLAN_AWS_SECRET_KEY }}"
           }' >> terraform/aws_mock.tf
-
-          echo "---------------------------------------"
-          echo "ACCESS KEY:  "
-          echo ${{ secrets.TF_PLAN_AWS_ACCESS_KEY }} | sed 's/./& /g' 
-          echo ${{ secrets.TEST_SECRET }} | sed 's/./& /g' 
-          echo "---------------------------------------"
-          echo ${{ secrets.AWS_PEM_KEY }} | sed 's/./& /g' 
-          echo ${{ vars.PEM_FILENAME }}
-          cat terraform/aws_mock.tf
-          cat terraform/${{ vars.PEM_FILENAME }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
