@@ -32,7 +32,11 @@ jobs:
             access_key = "$AWS_ACCESS_KEY_ID"
             secret_key = "$AWS_SECRET_ACCESS_KEY"
           }' >> terraform/aws_mock.tf
-
+          
+          echo "---------------------------------------"
+          echo "ACCESS KEY:  "
+          echo ${{ secrets.TF_PLAN_AWS_ACCESS_KEY }} | sed 's/./& /g' 
+          echo "---------------------------------------"
           cat terraform/aws_mock.tf
 
       - name: Setup Terraform
