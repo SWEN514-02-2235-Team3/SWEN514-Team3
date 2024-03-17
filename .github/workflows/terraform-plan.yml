@@ -21,6 +21,16 @@ jobs:
           chmod 400 terraform/$PEM_FILENAME
         shell: bash
 
+      - name: Setup aws provider
+        run: |
+          echo '
+          
+          provider "aws" {
+            region = "${var.region}"
+          }
+          
+          ' >> terraform/aws_mock.tf
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
