@@ -23,15 +23,13 @@ jobs:
 
       - name: Setup aws provider
         run: |
-          echo '
-          
-          provider "aws" {
+          echo 'provider "aws" {
             region = "${var.region}"
+            skip_credentials_validation = true
+            skip_metadata_api_check     = true
             access_key = "${{ env.AWS_ACCESS_KEY_ID }}"
             secret_key = "${{ env.AWS_SECRET_ACCESS_KEY }}"
-          }
-          
-          ' >> terraform/aws_mock.tf
+          }' >> terraform/aws_mock.tf
 
           cat terraform/aws_mock.tf
 
