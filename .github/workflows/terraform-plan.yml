@@ -1,0 +1,16 @@
+name: Terraform Infrastructure Test
+run-name: Terraform Test (${{ github.actor }})
+on: [push]
+jobs:
+  terraform-test:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+      - name: Terraform Init
+        run: ls
