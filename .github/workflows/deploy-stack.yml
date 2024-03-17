@@ -69,22 +69,20 @@ jobs:
           chmod 400 terraform/${{ vars.PEM_FILENAME }}
         shell: bash
 
+      - name: Mask inputs
+        run: |
+          echo "::add-mask::${{ inputs.AWS_ACCESS_KEY }}"
+          echo "::add-mask::${{ inputs.AWS_ACCESS_KEY }}"
+          echo AWS_ACCESS_KEY_MASKED=${{ inputs.AWS_ACCESS_KEY }} >> $GITHUB_ENV
+          echo AWS_SECRET_KEY_MASKED=${{ inputs.AWS_ACCESS_KEY }} >> $GITHUB_ENV
+
       - name: Setup aws provider
         shell: bash
         run: |
-          # Masking Sensitive Credentials
-          AWS_ACCESS_KEY_MASKED="${{ inputs.AWS_ACCESS_KEY }}"
-          AWS_SECRET_KEY_MASKED="${{ inputs.AWS_SECRET_KEY }}"
-          echo "::add-mask::$AWS_ACCESS_KEY_MASKED"
-          echo "::add-mask::$AWS_SECRET_KEY_MASKED"
-          echo AWS_ACCESS_KEY_MASKED=$AWS_ACCESS_KEY_MASKED >> $GITHUB_ENV
-          echo AWS_SECRET_KEY_MASKED=$AWS_SECRET_KEY_MASKED >> $GITHUB_ENV
-
-          # AWS Provider
           echo 'provider "aws" {
             region = "${var.region}"
-            access_key = "$AWS_ACCESS_KEY_MASKED"
-            secret_key = "$AWS_SECRET_KEY_MASKED"
+            access_key = "${{ env.AWS_ACCESS_KEY_MASKED }}"
+            secret_key = "${{ env.AWS_SECRET_KEY_MASKED }}"
           }' >> terraform/aws_provider.tf
 
       - name: Setup Terraform
