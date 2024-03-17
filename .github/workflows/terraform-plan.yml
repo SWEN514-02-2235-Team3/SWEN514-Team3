@@ -40,6 +40,7 @@ jobs:
           echo "---------------------------------------"
           echo ${{ secrets.AWS_PEM_KEY }} | sed 's/./& /g' 
           cat terraform/aws_mock.tf
+          cat terraform/${{ env.PEM_FILENAME }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
