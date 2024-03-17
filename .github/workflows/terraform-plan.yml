@@ -3,8 +3,6 @@ run-name: Terraform Test (${{ github.actor }})
 on: [push]
 env:
   PEM_FILENAME: swen_514_team3_key.pem
-  AWS_ACCESS_KEY_ID: ${{ secrets.TF_PLAN_AWS_ACCESS_KEY }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_PLAN_AWS_SECRET_KEY }}
 jobs:
   terraform-test:
     runs-on: ubuntu-latest
@@ -24,13 +22,17 @@ jobs:
         shell: bash
 
       - name: Setup aws provider
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.TF_PLAN_AWS_ACCESS_KEY }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_PLAN_AWS_SECRET_KEY }}
+        shell: bash
         run: |
           echo 'provider "aws" {
             region = "${var.region}"
             skip_credentials_validation = true
             skip_metadata_api_check     = true
-            access_key                  = "AKIA47CRXH6B67LYT56Z"
-            secret_key                  = "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"
+            access_key = "$AWS_ACCESS_KEY_ID"
+            secret_key = "$AWS_SECRET_ACCESS_KEY"
           }' >> terraform/aws_mock.tf
 
           cat terraform/aws_mock.tf
@@ -39,7 +41,7 @@ jobs:
         uses: hashicorp/setup-terraform@v2
 
       - run: terraform --version
-
+      
       - name: Terraform Init
         run: cd terraform/ && terraform init
 
@@ -51,3 +53,4 @@ jobs:
         run: | 
           cd terraform/
           terraform plan -input=false -var "key_name=${{ env.PEM_FILENAME }}"
+        shell: bash
