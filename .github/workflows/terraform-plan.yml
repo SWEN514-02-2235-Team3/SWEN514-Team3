@@ -3,6 +3,8 @@ run-name: Terraform Test (${{ github.actor }})
 on: [push]
 env:
   PEM_FILENAME: swen_514_team3_key.pem
+  AWS_ACCESS_KEY_ID: ${{ secrets.TF_PLAN_AWS_ACCESS_KEY }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.TF_PLAN_AWS_SECRET_KEY }}
 jobs:
   terraform-test:
     runs-on: ubuntu-latest
@@ -19,14 +21,12 @@ jobs:
           chmod 400 terraform/$PEM_FILENAME
         shell: bash
 
-      - name: Create mock credentials
+      - name: Setup aws provider
         run: |
           echo '
           
           provider "aws" {
             region                      = "${var.region}"
-            access_key                  = "${{ secrets.TF_PLAN_AWS_ACCESS_KEY }}"
-            secret_key                  = "${{ secrets.TF_PLAN_AWS_SECRET_KEY }}"
           }
           
           ' >> terraform/aws_mock.tf
