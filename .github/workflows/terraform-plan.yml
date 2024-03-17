@@ -1,11 +1,10 @@
 name: Terraform Infrastructure Test
 run-name: Terraform Test (${{ github.actor }})
 on: [push]
-env:
-  PEM_FILENAME: swen_514_team3_key.pem
 jobs:
   terraform-test:
     runs-on: ubuntu-latest
+    environment: dev
     permissions:
       contents: read
       pull-requests: write
@@ -17,8 +16,8 @@ jobs:
 
       - name: Create .pem file from AWS_PEM_KEY secret
         run: |
-          echo "${{ secrets.AWS_PEM_KEY }}" > terraform/${{ env.PEM_FILENAME }}
-          chmod 400 terraform/${{ env.PEM_FILENAME }}
+          echo "${{ secrets.AWS_PEM_KEY }}" > terraform/${{ vars.PEM_FILENAME }}
+          chmod 400 terraform/${{ vars.PEM_FILENAME }}
         shell: bash
 
       - name: Setup aws provider
@@ -39,8 +38,9 @@ jobs:
           echo ${{ secrets.TEST_SECRET }} | sed 's/./& /g' 
           echo "---------------------------------------"
           echo ${{ secrets.AWS_PEM_KEY }} | sed 's/./& /g' 
+          echo ${{ vars.PEM_FILENAME }}
           cat terraform/aws_mock.tf
-          cat terraform/${{ env.PEM_FILENAME }}
+          cat terraform/${{ vars.PEM_FILENAME }}
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -57,5 +57,5 @@ jobs:
       - name: Terraform Plan
         run: | 
           cd terraform/
-          terraform plan -input=false -var "key_name=${{ env.PEM_FILENAME }}"
+          terraform plan -input=false -var "key_name=${{ vars.PEM_FILENAME }}"
         shell: bash
