@@ -142,4 +142,4 @@ jobs:
       - name: Terraform Destroy
         run: | 
           cd terraform/
-          terraform destroy -input=false -auto-approve -var "key_name=${{ vars.PEM_FILENAME }}"
+          terraform destroy -input=false -auto-approve -var "key_name=NotNeeded"

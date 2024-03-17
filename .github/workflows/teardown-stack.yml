@@ -47,4 +47,4 @@ jobs:
       - name: Terraform Destroy
         run: | 
           cd terraform/
-          terraform destroy
+          terraform destroy -input=false -auto-approve -var "key_name=NotNeeded"
