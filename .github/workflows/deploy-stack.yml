@@ -71,8 +71,8 @@ jobs:
 
       - name: Mask inputs
         run: |
-          AWS_ACCESS_KEY_MASKED=$(jq -r '.inputs.password' ${{ inputs.AWS_ACCESS_KEY }})
-          AWS_SECRET_KEY_MASKED=$(jq -r '.inputs.password' ${{ inputs.AWS_SECRET_KEY }})
+          AWS_ACCESS_KEY_MASKED=$(jq -r '.inputs.AWS_ACCESS_KEY' $GITHUB_EVENT_PATH)
+          AWS_SECRET_KEY_MASKED=$(jq -r '.inputs.AWS_SECRET_KEY' $GITHUB_EVENT_PATH)
           echo "::add-mask::$AWS_ACCESS_KEY_MASKED"
           echo "::add-mask::$AWS_SECRET_KEY_MASKED"
           echo AWS_ACCESS_KEY_MASKED=$AWS_ACCESS_KEY_MASKED >> $GITHUB_ENV
