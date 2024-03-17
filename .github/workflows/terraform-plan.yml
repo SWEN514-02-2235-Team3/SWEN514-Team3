@@ -17,8 +17,8 @@ jobs:
 
       - name: Create .pem file from AWS_PEM_KEY secret
         run: |
-          echo "${{ secrets.AWS_PEM_KEY }}" > terraform/$PEM_FILENAME
-          chmod 400 terraform/$PEM_FILENAME
+          echo "${{ secrets.AWS_PEM_KEY }}" > terraform/${{ env.PEM_FILENAME }}
+          chmod 400 terraform/${{ env.PEM_FILENAME }}
         shell: bash
 
       - name: Setup aws provider
@@ -27,8 +27,8 @@ jobs:
           
           provider "aws" {
             region = "${var.region}"
-            access_key = "$AWS_ACCESS_KEY_ID"
-            secret_key = "$AWS_SECRET_ACCESS_KEY"
+            access_key = "${{ env.AWS_ACCESS_KEY_ID }}"
+            secret_key = "${{ env.AWS_SECRET_ACCESS_KEY }}"
           }
           
           ' >> terraform/aws_mock.tf
@@ -48,4 +48,4 @@ jobs:
       - name: Terraform Plan
         run: | 
           cd terraform/
-          terraform plan -input=false -var "key_name=$PEM_FILENAME"
+          terraform plan -input=false -var "key_name=${{ env.PEM_FILENAME }}"
