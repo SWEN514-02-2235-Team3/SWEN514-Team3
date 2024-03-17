@@ -33,7 +33,7 @@ jobs:
             region = "${var.region}"
             access_key = "${{ secrets.TF_PLAN_AWS_ACCESS_KEY }}"
             secret_key = "${{ secrets.TF_PLAN_AWS_SECRET_KEY }}"
-          }' >> terraform/aws_mock.tf
+          }' >> terraform/aws_provider.tf
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
@@ -51,6 +51,8 @@ jobs:
         run: | 
           cd terraform/
           terraform plan -input=false -var "key_name=${{ vars.PEM_FILENAME }}"
+          mkdir test_if_jobs_persist_throughout_the_entire_workflow/
+          ls -la
         shell: bash
 
   # Deploy Infrastructure
@@ -60,37 +62,40 @@ jobs:
     environment: dev
     needs: terraform-test
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Create .pem file from AWS_PEM_KEY secret
+      - name: Test
         run: |
-          echo "${{ secrets.AWS_PEM_KEY }}" > terraform/${{ vars.PEM_FILENAME }}
-          chmod 400 terraform/${{ vars.PEM_FILENAME }}
-        shell: bash
+          ls -la
+      # - name: Checkout
+      #   uses: actions/checkout@v3
 
-      - name: Setup aws provider
-        shell: bash
-        run: |
-          echo 'provider "aws" {
-            region = "${var.region}"
-            access_key = "::add-mask::${{ inputs.AWS_ACCESS_KEY }}"
-            secret_key = "::add-mask::${{ inputs.AWS_SECRET_KEY }}"
-          }' >> terraform/aws_provider.tf
+      # - name: Create .pem file from AWS_PEM_KEY secret
+      #   run: |
+      #     echo "${{ secrets.AWS_PEM_KEY }}" > terraform/${{ vars.PEM_FILENAME }}
+      #     chmod 400 terraform/${{ vars.PEM_FILENAME }}
+      #   shell: bash
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
+      # - name: Setup aws provider
+      #   shell: bash
+      #   run: |
+      #     echo 'provider "aws" {
+      #       region = "${var.region}"
+      #       access_key = "::add-mask::${{ inputs.AWS_ACCESS_KEY }}"
+      #       secret_key = "::add-mask::${{ inputs.AWS_SECRET_KEY }}"
+      #     }' >> terraform/aws_provider.tf
 
-      - name: Terraform Init
-        run: cd terraform/ && terraform init
+      # - name: Setup Terraform
+      #   uses: hashicorp/setup-terraform@v2
 
-      - name: Terraform Plan
-        run: | 
-          cd terraform/
-          terraform plan -input=false -var "key_name=${{ vars.PEM_FILENAME }}"
-        shell: bash
+      # - name: Terraform Init
+      #   run: cd terraform/ && terraform init
 
-      - name: Terraform Apply
-        run: |
-          cd terraform/
-          terraform apply -input=false -var "key_name=${{ vars.PEM_FILENAME }}"
+      # - name: Terraform Plan
+      #   run: | 
+      #     cd terraform/
+      #     terraform plan -input=false -var "key_name=${{ vars.PEM_FILENAME }}"
+      #   shell: bash
+
+      # - name: Terraform Apply
+      #   run: |
+      #     cd terraform/
+      #     terraform apply -input=false -var "key_name=${{ vars.PEM_FILENAME }}"
