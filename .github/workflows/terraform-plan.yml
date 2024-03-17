@@ -33,6 +33,8 @@ jobs:
           
           ' >> terraform/aws_mock.tf
 
+          cat terraform/aws_mock.tf
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v2
 
