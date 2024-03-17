@@ -29,8 +29,6 @@ jobs:
         run: |
           echo 'provider "aws" {
             region = "${var.region}"
-            skip_credentials_validation = true
-            skip_metadata_api_check     = true
             access_key = "$AWS_ACCESS_KEY_ID"
             secret_key = "$AWS_SECRET_ACCESS_KEY"
           }' >> terraform/aws_mock.tf
