@@ -20,13 +20,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Mask inputs
+        run: |
+          AWS_ACCESS_KEY_MASKED=$(jq -r '.inputs.AWS_ACCESS_KEY' $GITHUB_EVENT_PATH)
+          AWS_SECRET_KEY_MASKED=$(jq -r '.inputs.AWS_SECRET_KEY' $GITHUB_EVENT_PATH)
+          echo "::add-mask::$AWS_ACCESS_KEY_MASKED"
+          echo "::add-mask::$AWS_SECRET_KEY_MASKED"
+          echo AWS_ACCESS_KEY_MASKED=$AWS_ACCESS_KEY_MASKED >> $GITHUB_ENV
+          echo AWS_SECRET_KEY_MASKED=$AWS_SECRET_KEY_MASKED >> $GITHUB_ENV
+
       - name: Setup aws provider
         shell: bash
         run: |
           echo 'provider "aws" {
             region = "${var.region}"
-            access_key = "::add-mask::${{ inputs.AWS_ACCESS_KEY }}"
-            secret_key = "::add-mask::${{ inputs.AWS_SECRET_KEY }}"
+            access_key = "${{ env.AWS_ACCESS_KEY_MASKED }}"
+            secret_key = "${{ env.AWS_SECRET_KEY_MASKED }}"
           }' >> terraform/aws_provider.tf
 
       - name: Setup Terraform

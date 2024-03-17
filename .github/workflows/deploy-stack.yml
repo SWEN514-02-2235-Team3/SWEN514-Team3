@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       AWS_ACCESS_KEY:
-        description: "Personal AWS Access Key"
+        description: "Personal AWS Access Key (will be masked)"
         required: true
       AWS_SECRET_KEY:
-        description: "Personal AWS Secret Key"
+        description: "Personal AWS Secret Key (will be masked)"
         required: true
 
 jobs:
