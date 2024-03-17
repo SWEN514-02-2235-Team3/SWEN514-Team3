@@ -1,0 +1,41 @@
+name: Teardown Environment
+run-name: Teardown Personal Environment (${{ github.actor }})
+on:
+  workflow_dispatch:
+    inputs:
+      AWS_ACCESS_KEY:
+        description: "Personal AWS Access Key"
+        required: true
+      AWS_SECRET_KEY:
+        description: "Personal AWS Secret Key"
+        required: true
+
+jobs:
+  # Destroy Infrastructure
+  destroy:
+    name: Destroy Terraform Infrastructure
+    runs-on: ubuntu-latest
+    environment: dev
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup aws provider
+        shell: bash
+        run: |
+          echo 'provider "aws" {
+            region = "${var.region}"
+            access_key = "::add-mask::${{ inputs.AWS_ACCESS_KEY }}"
+            secret_key = "::add-mask::${{ inputs.AWS_SECRET_KEY }}"
+          }' >> terraform/aws_provider.tf
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2
+
+      - name: Terraform Init
+        run: cd terraform/ && terraform init
+
+      - name: Terraform Destroy
+        run: | 
+          cd terraform/
+          terraform destroy
