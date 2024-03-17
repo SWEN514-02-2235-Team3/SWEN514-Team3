@@ -71,10 +71,12 @@ jobs:
 
       - name: Mask inputs
         run: |
-          echo "::add-mask::${{ inputs.AWS_ACCESS_KEY }}"
-          echo "::add-mask::${{ inputs.AWS_ACCESS_KEY }}"
-          echo AWS_ACCESS_KEY_MASKED=${{ inputs.AWS_ACCESS_KEY }} >> $GITHUB_ENV
-          echo AWS_SECRET_KEY_MASKED=${{ inputs.AWS_ACCESS_KEY }} >> $GITHUB_ENV
+          AWS_ACCESS_KEY_MASKED=$(jq -r '.inputs.password' ${{ inputs.AWS_ACCESS_KEY }})
+          AWS_SECRET_KEY_MASKED=$(jq -r '.inputs.password' ${{ inputs.AWS_SECRET_KEY }})
+          echo "::add-mask::$AWS_ACCESS_KEY_MASKED"
+          echo "::add-mask::$AWS_SECRET_KEY_MASKED"
+          echo AWS_ACCESS_KEY_MASKED=$AWS_ACCESS_KEY_MASKED >> $GITHUB_ENV
+          echo AWS_SECRET_KEY_MASKED=$AWS_SECRET_KEY_MASKED >> $GITHUB_ENV
 
       - name: Setup aws provider
         shell: bash
