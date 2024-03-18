@@ -100,46 +100,21 @@ jobs:
         shell: bash
 
       - name: Terraform Apply
+        if: always()
         run: |
           cd terraform/
-          terraform apply -input=false -auto-approve -var "key_name=${{ vars.PEM_NAME }}"
-  
-  # destroy on workflow failure
-  destroy_on_failure:
-    name: WORKFLOW FAILURE - Destroy Terraform Infrastructure
-    if: ${{ always() && contains(needs.*.result, 'failure') }}
-    runs-on: ubuntu-latest
-    environment: dev
-    needs: deploy
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v3
-
-      - name: Mask inputs
+          terraform apply -input=false -auto-approve -var "key_name=${{ vars.PEM_NAME }}" || echo $? > tf_exit_code.txt
+          if [ -f tf_exit_code.txt ]; then
+            exit_code=$(cat tf_exit_code.txt)
+            if [ $exit_code -ne 0 ]; then
+              echo "Terraform apply failed with exit code $exit_code."
+              exit 1
+            fi
+          fi
+          
+      - name: WORKFLOW FAILURE - Terraform Destroy
+        if: failure()
         run: |
-          AWS_ACCESS_KEY_MASKED=$(jq -r '.inputs.AWS_ACCESS_KEY' $GITHUB_EVENT_PATH)
-          AWS_SECRET_KEY_MASKED=$(jq -r '.inputs.AWS_SECRET_KEY' $GITHUB_EVENT_PATH)
-          echo "::add-mask::$AWS_ACCESS_KEY_MASKED"
-          echo "::add-mask::$AWS_SECRET_KEY_MASKED"
-          echo AWS_ACCESS_KEY_MASKED=$AWS_ACCESS_KEY_MASKED >> $GITHUB_ENV
-          echo AWS_SECRET_KEY_MASKED=$AWS_SECRET_KEY_MASKED >> $GITHUB_ENV
-
-      - name: Setup aws provider
-        shell: bash
-        run: |
-          echo 'provider "aws" {
-            region = "${var.region}"
-            access_key = "${{ env.AWS_ACCESS_KEY_MASKED }}"
-            secret_key = "${{ env.AWS_SECRET_KEY_MASKED }}"
-          }' >> terraform/aws_provider.tf
-
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v2
-
-      - name: Terraform Init
-        run: cd terraform/ && terraform init
-
-      - name: Terraform Destroy
-        run: | 
           cd terraform/
+          terraform state
           terraform destroy -input=false -auto-approve -var "key_name=NotNeeded"
