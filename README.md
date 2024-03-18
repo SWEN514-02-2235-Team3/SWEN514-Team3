@@ -13,12 +13,9 @@ ________________________
 This only needs to be done once as an initial setup
 ## GitHub Secrets
 These github secrets are required for the project to deploy:
-- AWS_PEM_KEY
-    SSH Key used to deploy the terraform project. Generate a PEM key from the AWS console 
-- TF_PLAN_AWS_ACCESS_KEY
-    Used for CI/CD unit testing
-- TF_PLAN_AWS_SECRET_KEY
-    Used for CI/CD unit testing
+- `AWS_PEM_KEY` - SSH Key used to deploy the terraform project. Generate a PEM key from the AWS console 
+- `TF_PLAN_AWS_ACCESS_KEY` - Used for CI/CD unit testing
+- `TF_PLAN_AWS_SECRET_KEY` - Used for CI/CD unit testing
 
 ## Setting up `terraform plan` for CI/CD workflow
 Creating minimal privileges to run the `terraform plan` as part of unit testing
