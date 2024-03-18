@@ -22,8 +22,8 @@ jobs:
 
       - name: Create .pem file from AWS_PEM_KEY secret
         run: |
-          echo "${{ secrets.AWS_PEM_KEY }}" > terraform/${{ vars.PEM_FILENAME }}
-          chmod 400 terraform/${{ vars.PEM_FILENAME }}
+          echo "${{ secrets.AWS_PEM_KEY }}" > terraform/${{ vars.PEM_NAME }}.pem
+          chmod 400 terraform/${{ vars.PEM_NAME }}.pem
         shell: bash
 
       - name: Setup aws provider
@@ -50,7 +50,7 @@ jobs:
       - name: Terraform Plan
         run: | 
           cd terraform/
-          terraform plan -input=false -var "key_name=${{ vars.PEM_FILENAME }}"
+          terraform plan -input=false -var "key_name=${{ vars.PEM_NAME }}"
         shell: bash
 
   # Deploy Infrastructure
@@ -65,8 +65,8 @@ jobs:
 
       - name: Create .pem file from AWS_PEM_KEY secret
         run: |
-          echo "${{ secrets.AWS_PEM_KEY }}" > terraform/${{ vars.PEM_FILENAME }}
-          chmod 400 terraform/${{ vars.PEM_FILENAME }}
+          echo "${{ secrets.AWS_PEM_KEY }}" > terraform/${{ vars.PEM_NAME }}.pem
+          chmod 400 terraform/${{ vars.PEM_NAME }}.pem
         shell: bash
 
       - name: Mask inputs
@@ -96,13 +96,13 @@ jobs:
       - name: Terraform Plan
         run: | 
           cd terraform/
-          terraform plan -input=false -var "key_name=${{ vars.PEM_FILENAME }}"
+          terraform plan -input=false -var "key_name=${{ vars.PEM_NAME }}".pem
         shell: bash
 
       - name: Terraform Apply
         run: |
           cd terraform/
-          terraform apply -input=false -auto-approve -var "key_name=${{ vars.PEM_FILENAME }}"
+          terraform apply -input=false -auto-approve -var "key_name=${{ vars.PEM_NAME }}".pem
   
   # destroy on workflow failure
   destroy_on_failure:
