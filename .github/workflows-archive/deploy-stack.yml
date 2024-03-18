@@ -115,12 +115,13 @@ jobs:
         if: failure()
         run: |
           exit 1
-
-      - id: create_token
-        uses: tibdex/github-app-token@v2
+          
+      - name: Generate token
+        id: generate_token
+        uses: tibdex/github-app-token@v1
         with:
           app_id: ${{ secrets.APP_ID }}
-          private_key: ${{ secrets.PRIVATE_KEY }}
+          private_key: ${{ secrets.APP_PRIVATE_KEY }}
 
       - name: DEPLOYMENT ACTIVE - Wait until prompt to remove AWS Deployment
         uses: trstringer/manual-approval@v1
