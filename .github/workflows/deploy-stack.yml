@@ -111,10 +111,18 @@ jobs:
               exit 1
             fi
           fi
-          
+
       - name: WORKFLOW FAILURE - Terraform Destroy
         if: failure()
         run: |
           cd terraform/
-          terraform state
+          terraform state list
           terraform destroy -input=false -auto-approve -var "key_name=NotNeeded"
+  destroy_on_failure:
+    name: WORKFLOW FAILURE - Destroy Terraform Infrastructure
+    if: ${{ always() && contains(needs.*.result, 'failure') }}
+    runs-on: ubuntu-latest
+    environment: dev
+    needs: deploy
+    steps:
+      - run: echo "Workflow failed, terraform state destroyed"
