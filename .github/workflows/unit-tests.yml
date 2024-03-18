@@ -14,12 +14,6 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Create .pem file from AWS_PEM_KEY secret
-        run: |
-          echo "${{ secrets.AWS_PEM_KEY }}" > terraform/${{ vars.PEM_NAME }}.pem
-          chmod 400 terraform/${{ vars.PEM_NAME }}.pem
-        shell: bash
-
       - name: Setup aws provider
         shell: bash
         run: |
@@ -44,5 +38,5 @@ jobs:
       - name: Terraform Plan
         run: | 
           cd terraform/
-          terraform plan -input=false -var "key_name=${{ vars.PEM_NAME }}".pem
+          terraform plan -input=false -var "key_name=NotNeeded"
         shell: bash

@@ -96,13 +96,13 @@ jobs:
       - name: Terraform Plan
         run: | 
           cd terraform/
-          terraform plan -input=false -var "key_name=${{ vars.PEM_NAME }}".pem
+          terraform plan -input=false -var "key_name=NotNeeded"
         shell: bash
 
       - name: Terraform Apply
         run: |
           cd terraform/
-          terraform apply -input=false -auto-approve -var "key_name=${{ vars.PEM_NAME }}".pem
+          terraform apply -input=false -auto-approve -var "key_name=${{ vars.PEM_NAME }}"
   
   # destroy on workflow failure
   destroy_on_failure:
