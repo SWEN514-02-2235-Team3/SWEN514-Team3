@@ -111,19 +111,25 @@ jobs:
           terraform state list
           terraform destroy -input=false -auto-approve -var "key_name=NotNeeded"
 
-      - name: Exit Code 1
+      - name: Stop Workflow on Failure
         if: failure()
         run: |
           exit 1
 
-      - name: TERRAFORM DESTROY - Prompt
+      - id: create_token
+        uses: tibdex/github-app-token@v2
+        with:
+          app_id: ${{ secrets.APP_ID }}
+          private_key: ${{ secrets.PRIVATE_KEY }}
+
+      - name: DEPLOYMENT ACTIVE - Wait until prompt to remove AWS Deployment
         uses: trstringer/manual-approval@v1
         with:
-          secret: ${{ steps.generate_token.outputs.token }}
+          secret: ${{ steps.create_token.outputs.token }}
           approvers: ${{ github.actor }}
           minimum-approvals: 1
 
-      - name: TERRAFORM DESTROY - Destroy Infrastructure
+      - name: TERRAFORM DESTROY - Teardown AWS Deployment
         run: |
           cd terraform/
           terraform state list
