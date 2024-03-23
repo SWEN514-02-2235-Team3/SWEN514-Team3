@@ -8,13 +8,16 @@ variable "region" {
   default     = "us-east-1"
 }
 
+/*
+Dynamically retrieve csv files from data/ on local repository
+*/
 locals {
-  directories = ["../data/reddit", "../data/youtube", "../data/facebook"]
+  data_dirs = ["reddit", "youtube", "twitter"]
 
   csv_files = flatten([
-    for dir in local.directories : [
-      for file in fileset(dir, "*.csv") : {
-        path = "${dir}/${file}"
+    for dir in local.data_dirs: [
+      for file in fileset("../data/${dir}", "*.csv") : {
+        path = "../data/${dir}/${file}"
         key  = "${dir}/${file}"
       }
     ]
