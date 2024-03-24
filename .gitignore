@@ -11,6 +11,7 @@ yarn-error.log
 *.tfstate.backup
 *.tfvars
 .terraform.lock.hcl
+.terraform.tfstate.lock.info
 ## for debugging or local deploy
 aws_provider.tf
 

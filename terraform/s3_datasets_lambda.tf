@@ -1,9 +1,3 @@
-/**********************
-Lambdas for the project
-***********************/
-
-
-
 /*
     DATASETS S3 TRIGGER
 */
@@ -33,11 +27,13 @@ resource "aws_iam_role" "lambda_s3_datasets_role" {
 
 # S3 Lambda function for datasets
 resource "aws_lambda_function" "lambda_s3_datasets" {
-  function_name    = "sentiment_analysis_lambda"
+  function_name    = "swen514-sa-datasets"
   role             = aws_iam_role.lambda_s3_datasets_role.arn
   runtime          = "python3.9"
   handler          = "process_dataset.handler"
   filename         = "${data.archive_file.lambda_s3_datasets_code.output_path}" 
+
+  depends_on = [aws_iam_role_policy_attachment.lambda_s3_datasets_policy_attach]
 }
 
 
@@ -45,14 +41,38 @@ resource "aws_lambda_function" "lambda_s3_datasets" {
 resource "aws_iam_role_policy_attachment" "lambda_s3_datasets_policy_attach" {
   role       = aws_iam_role.lambda_s3_datasets_role.name
   policy_arn = "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+
+  depends_on = [aws_iam_role.lambda_s3_datasets_role]
 }
 
-# S3 Trigger
-resource "aws_lambda_permission" "lambda_s3_datasets_trigger" {
-  statement_id  = "AllowExecutionFromS3Bucket"
+# For cloudwatch logs
+resource "aws_iam_role_policy_attachment" "lambda_s3_datasets_policy_attach_logs" {
+  role       = aws_iam_role.lambda_s3_datasets_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+
+  depends_on = [aws_iam_role.lambda_s3_datasets_role]
+}
+
+# add permission
+resource "aws_lambda_permission" "lambda_s3_trigger_source" {
+  statement_id  = "AllowS3Invoke"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.lambda_s3_datasets.arn
+  function_name = aws_lambda_function.lambda_s3_datasets.function_name
   principal     = "s3.amazonaws.com"
-  
-  source_arn = aws_s3_bucket.s3_bucket_sentianalysis.arn
+  source_arn    = "arn:aws:s3:::${aws_s3_bucket.s3_bucket_sentianalysis.id}"
+
+  depends_on = [aws_s3_bucket.s3_bucket_sentianalysis]
+}
+
+# add trigger
+resource "aws_s3_bucket_notification" "lambda_s3_datasets_trigger" {
+  bucket = aws_s3_bucket.s3_bucket_sentianalysis.id
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.lambda_s3_datasets.arn
+    events              = ["s3:ObjectCreated:Put"]
+    filter_suffix       = ".csv"
+  }
+
+  depends_on = [aws_s3_bucket.s3_bucket_sentianalysis]
 }
