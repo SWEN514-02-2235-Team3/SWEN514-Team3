@@ -1,7 +1,11 @@
-/*
-S3 Bucket Lambda
+/**********************
+Lambdas for the project
+***********************/
 
-Process datasets 
+
+
+/*
+    DATASETS S3 TRIGGER
 */
 
 # package up python code for datasets
