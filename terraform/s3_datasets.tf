@@ -23,7 +23,7 @@ resource "aws_s3_object" "folder_structure" {
 Upload data sets to the s3 bucket
 */
 resource "aws_s3_object" "upload_dataset" {
-    depends_on = [aws_s3_bucket.s3_bucket_sentianalysis, aws_s3_object.folder_structure, aws_s3_bucket_notification.lambda_s3_datasets_trigger]
+    depends_on = [aws_s3_bucket.s3_bucket_sentianalysis, aws_s3_object.folder_structure, aws_s3_bucket_notification.lambda_s3_datasets_trigger, aws_dynamodb_table.db_sa_data]
 
     for_each = { for file in local.csv_files : file.key => file }
     

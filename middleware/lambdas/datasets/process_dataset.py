@@ -2,6 +2,8 @@ import boto3
 import csv
 import io
 from dateutil.parser import parse
+import uuid
+import botocore.exceptions
 
 # Boto Setup
 s3_client = boto3.client("s3")
@@ -38,16 +40,29 @@ def handler(event, context):
             date = str(date)[:10]
         except: continue # skip if its not a valid date
         
-        sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment']['Sentiment'] # positive, negative, or neutral
-        print(f"[{date}][{dataset_category}] {sentiment}: {comment}")
-        dynamodb_client.put_item(
-            TableName="SentAnalysisDataResults",
-            Item={
-                'Comment_Date': {'S': date},
-                'Comment': {'S': comment},
-                'Sentiment': {'S' : sentiment},
-                'Source': {'S': dataset_category},
-            }
-        )
+        sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment']['Sentiment'] # positive, negative, or neutral        
         
+        retry_attempts = 0
+        # Generate a non-blocking UUID and insert record to dynamodb
+        while True:
+            try:
+                if retry_attempts > 3: break # stop trying to process a uuid
+                dynamodb_client.put_item(
+                    TableName="SentAnalysisDataResults",
+                    Item={
+                        'id': {'S': uuid.uuid4()}, # set a random id
+                        'comment_date': {'S': date},
+                        'comment': {'S': comment},
+                        'sentiment': {'S' : sentiment},
+                        'source': {'S': dataset_category},
+                    }
+                )
+                break
+            except botocore.exceptions.ClientError:
+                retry_attempts+=1
+                continue # try again until there is no collisions
+        
+        if retry_attempts > 3: continue # continue to the next row if we can't generate a uuid for some reason
+        
+        print(f"[{date}][{dataset_category}] {sentiment}: {comment}")   
        

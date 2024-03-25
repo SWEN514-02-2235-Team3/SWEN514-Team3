@@ -8,12 +8,22 @@
     5. sentiment analysis results (positive/negative/neutral)
 */
 resource "aws_dynamodb_table" "db_sa_data" {
-  name = "SentAnalysisDataResults"
+    name = "SentAnalysisDataResults"
 
-  attribute {
-    name = "id"
-    type = "N"
-  }
-
-   hash_key = "id" 
+    attribute {
+        name = "id"
+        type = "S"
+    }
+    hash_key = "id" 
+    
+    billing_mode   = "PROVISIONED"
+    read_capacity  = 5
+    write_capacity = 5
+    stream_enabled = false
+    point_in_time_recovery {
+        enabled = false
+    }
+    tags = {
+        Name = "SentAnalysisDataResults"
+    }
 }

@@ -61,7 +61,7 @@ resource "aws_lambda_permission" "lambda_s3_trigger_source" {
   principal     = "s3.amazonaws.com"
   source_arn    = "arn:aws:s3:::${aws_s3_bucket.s3_bucket_sentianalysis.id}"
 
-  depends_on = [aws_s3_bucket.s3_bucket_sentianalysis]
+  depends_on = [aws_s3_bucket.s3_bucket_sentianalysis, aws_dynamodb_table.db_sa_data]
 }
 
 # add trigger
@@ -74,5 +74,5 @@ resource "aws_s3_bucket_notification" "lambda_s3_datasets_trigger" {
     filter_suffix       = ".csv"
   }
 
-  depends_on = [aws_s3_bucket.s3_bucket_sentianalysis]
+  depends_on = [aws_s3_bucket.s3_bucket_sentianalysis, aws_dynamodb_table.db_sa_data]
 }
