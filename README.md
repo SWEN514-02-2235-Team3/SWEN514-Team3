@@ -1,10 +1,15 @@
-# swen514-team3-project
-Team name pending :)
+# Sentiment Analysis Project (Team 3)
 - Saranya Dadi
 - Greg Villafane
 - Jackson Murphy
 - Nick Grosskopf
 - Jin Moon
+
+# Cloud Architecture
+## Datasets
+![image](https://github.com/jym2584/SWEN514-Team3/assets/67706639/6dcb700e-5c9e-4d55-9939-e8caa19c5e56)
+
+
 ________________________
 # How to Deploy Locally
 Install Terraform CLI
