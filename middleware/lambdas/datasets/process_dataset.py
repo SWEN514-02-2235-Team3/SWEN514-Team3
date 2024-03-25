@@ -1,10 +1,7 @@
 import boto3
-import logging
 import csv
 import io
-# Setup
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+from dateutil.parser import parse
 
 # Boto Setup
 s3_client = boto3.client("s3")
@@ -15,6 +12,7 @@ dynamodb_client = boto3.client("dynamodb")
 def handler(event, context):
     bucket_source = event['Records'][0]['s3']['bucket']['name'] # Bucket Name where file was uploaded
     dataset_filename = event['Records'][0]['s3']['object']['key'] # Filename of object (with path)
+    dataset_category = dataset_filename.split("/")[0] # assuming the dataset was stored in a folder (i.e. reddit, facebook, twitter)
     
     # Debug print
     to_print = f"RECIEVED DATASET `{dataset_filename}` FROM BUCKET `{bucket_source}`"
@@ -26,20 +24,30 @@ def handler(event, context):
     file = s3_client.get_object(Bucket=bucket_source, Key=dataset_filename) # get file from s3 bucket
     content = file['Body'].read().decode('utf-8') # read contents
     reader = csv.reader(io.StringIO(content)) # pass into csv reader
+    next(reader) # skip header
     
-    i = 0 # mostly for debugging
+    # iterate through the dataset (assuming the dataset has been edited to include these columns in order: date, comment)
     for row in reader:
-            #   For each line in file:
-            #       Get comment from csv file
-            #       Analyze text data using sentiment analysis
-            #       Extract the sentiment
-            #       Store results in DymanoDB
+        date = row[0]
+        comment = row[1]
         
+        # error handling
+        if not comment: continue # if there is no text data, continue to the next row
+        try: # parse date
+            date = parse(date, fuzzy=True)
+            date = str(date)[:10]
+        except: continue # skip if its not a valid date
         
-        print(row)
-        i+=1
-        
-        if (i >= 10):
-            break
+        sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment']['Sentiment'] # positive, negative, or neutral
+        print(f"[{date}][{dataset_category}] {sentiment}: {comment}")
+        dynamodb_client.put_item(
+            TableName="SentAnalysisDataResults",
+            Item={
+                'Comment_Date': {'S': date},
+                'Comment': {'S': comment},
+                'Sentiment': {'S' : sentiment},
+                'Source': {'S': dataset_category},
+            }
+        )
         
        

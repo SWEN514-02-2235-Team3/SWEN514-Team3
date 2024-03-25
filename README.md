@@ -6,8 +6,19 @@ Team name pending :)
 - Nick Grosskopf
 - Jin Moon
 ________________________
-# How to Deploy
-Use the CI/CD pipeline to deploy the project
+# How to Deploy Locally
+Install Terraform CLI
+Setup AWS credentials
+```
+cd <path_to_SWEN514-Team3>/terraform/
+terraform apply
+```
+
+Terraform apply stands up the AWS infrastructure & code needed to run the application.
+
+# How to Deploy using GitHub
+WIP
+
 ________________________
 # GitHub Repository Setup
 This only needs to be done once as an initial setup
