@@ -45,6 +45,13 @@ terraform apply
 
 Terraform apply stands up the AWS infrastructure & code needed to run the application.
 
+## How to develop locally
+TODO INSTRUCTIONS
+- If needed, deploy the entire terraform backend stack.
+  - This will allow you to develop lambda code.
+- Front-end
+  - **TODO INSTRUCTIONS**: Setup configuration to fetch required endpoints to run the application
+  - Run the node.js application: `cd frontend/ && npm start`
 
 ________________________
 
