@@ -27,7 +27,7 @@ locals {
   csv_files = flatten([
     for dir in local.data_dirs: [
       for file in fileset("../data/${var.dataset_selection}/${dir}", "*.csv") : {
-        path = "../data/${dir}/${file}"
+        path = "../data/${var.dataset_selection}/${dir}/${file}"
         key  = "${dir}/${file}"
       }
     ]
