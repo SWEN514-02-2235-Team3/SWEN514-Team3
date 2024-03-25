@@ -19,12 +19,12 @@ resource "aws_s3_object" "folder_structure" {
 }
 
 /*
-    Wait 20 seconds before uploading datasets to allow 
+    Wait 30 seconds before uploading datasets to allow 
     time for AWS to fully create the necessary resources
     (i.e. lambdas)
 */
-resource "time_sleep" "wait_20_seconds" {
-  create_duration = "20s"
+resource "time_sleep" "wait_before_uploading" {
+  create_duration = "60s"
   
   depends_on = [ 
     aws_s3_bucket_notification.lambda_s3_datasets_trigger,
@@ -39,7 +39,7 @@ resource "time_sleep" "wait_20_seconds" {
 Upload data sets to the s3 bucket
 */
 resource "aws_s3_object" "upload_dataset" {
-    depends_on = [time_sleep.wait_20_seconds]
+    depends_on = [time_sleep.wait_before_uploading]
 
     for_each = { for file in local.csv_files : file.key => file }
     

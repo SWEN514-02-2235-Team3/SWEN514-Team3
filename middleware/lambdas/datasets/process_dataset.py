@@ -50,7 +50,7 @@ def handler(event, context):
                 dynamodb_client.put_item(
                     TableName="SentAnalysisDataResults",
                     Item={
-                        'id': {'S': uuid.uuid4()}, # set a random id
+                        'id': {'S': str(uuid.uuid4())}, # set a random id
                         'comment_date': {'S': date},
                         'comment': {'S': comment},
                         'sentiment': {'S' : sentiment},
