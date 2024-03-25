@@ -8,18 +8,30 @@
 # Cloud Architecture
 ![image](https://github.com/jym2584/SWEN514-Team3/assets/67706639/521b4a72-9b17-487c-83f0-a2a8341443f4)
 ________________________
-# Dependencies
+# Local Development Setup & Dependencies
 - Node.js
-- Terraform
+- Terraform CLI
   - https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli#install-terraform
 - Python
 
 You can run `setup_dependencies.bat` or `setup_dependencies.sh` to setup the local repository
 # How to Deploy Locally
-Install Terraform CLI
-Setup AWS credentials
+**Pre-requisites**
+- Terraform CLI is installed
+- AWS Credentials are setup via terraform or within a terraform script
+  - If you want to set it up locally within the repository
+    - Fetch your AWS Access and Secret Key from the AWS Console
+    - Create `aws_provider.tf` under `terraform/` (this file will not be checked into the remote repository)
+        ```
+        region = "${var.region}" {
+            access_key = "<YOUR AWS ACCESS KEY>"
+            secret_key = "<YOUR AWS SECRET KEY>"
+        }
+        ```
+
+**Instructions**
 ```
-cd <path_to_SWEN514-Team3>/terraform/
+cd terraform/
 terraform apply
 ```
 
@@ -29,6 +41,8 @@ Terraform apply stands up the AWS infrastructure & code needed to run the applic
 WIP
 
 ________________________
+
+
 # GitHub Repository Setup
 This only needs to be done once as an initial setup
 ## GitHub Secrets
