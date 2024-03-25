@@ -6,10 +6,7 @@
 - Jin Moon
 
 # Cloud Architecture
-## Datasets
-![image](https://github.com/jym2584/SWEN514-Team3/assets/67706639/6dcb700e-5c9e-4d55-9939-e8caa19c5e56)
-
-
+![image](https://github.com/jym2584/SWEN514-Team3/assets/67706639/521b4a72-9b17-487c-83f0-a2a8341443f4)
 ________________________
 # How to Deploy Locally
 Install Terraform CLI
