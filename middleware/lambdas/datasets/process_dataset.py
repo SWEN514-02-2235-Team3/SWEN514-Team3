@@ -40,7 +40,7 @@ def handler(event, context):
             date = str(date)[:10]
         except: continue # skip if its not a valid date
         
-        sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment']['Sentiment'] # positive, negative, or neutral        
+        sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment'] # positive, negative, or neutral        
         
         retry_attempts = 0
         # Generate a non-blocking UUID and insert record to dynamodb

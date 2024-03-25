@@ -18,12 +18,28 @@ resource "aws_s3_object" "folder_structure" {
     for_each     = { for dir in local.data_dirs : dir => { folder = dir } }
 }
 
+/*
+    Wait 20 seconds before uploading datasets to allow 
+    time for AWS to fully create the necessary resources
+    (i.e. lambdas)
+*/
+resource "time_sleep" "wait_20_seconds" {
+  create_duration = "20s"
+  
+  depends_on = [ 
+    aws_s3_bucket_notification.lambda_s3_datasets_trigger,
+    aws_dynamodb_table.db_sa_data,
+    aws_s3_bucket.s3_bucket_sentianalysis,
+    aws_s3_object.folder_structure
+  ]
+}
+
 
 /*
 Upload data sets to the s3 bucket
 */
 resource "aws_s3_object" "upload_dataset" {
-    depends_on = [aws_s3_bucket.s3_bucket_sentianalysis, aws_s3_object.folder_structure, aws_s3_bucket_notification.lambda_s3_datasets_trigger, aws_dynamodb_table.db_sa_data]
+    depends_on = [time_sleep.wait_20_seconds]
 
     for_each = { for file in local.csv_files : file.key => file }
     
