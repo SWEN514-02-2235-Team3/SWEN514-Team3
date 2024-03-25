@@ -8,7 +8,13 @@
 # Cloud Architecture
 ![image](https://github.com/jym2584/SWEN514-Team3/assets/67706639/521b4a72-9b17-487c-83f0-a2a8341443f4)
 ________________________
-# Local Development Setup & Dependencies
+
+# How to Deploy using GitHub
+WIP
+
+__________________
+# Local Development & Deployment
+## Dependencies
 - Node.js
 - Terraform CLI
   - https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli#install-terraform
@@ -16,7 +22,7 @@ ________________________
 
 You can run `setup_dependencies.bat` or `setup_dependencies.sh` to setup the local repository or inspect the script and run the commands.
 
-# How to Deploy Locally
+## How to Deploy Locally
 **Pre-requisites**
 - Terraform CLI is installed
 - AWS Credentials are setup via terraform or within a terraform script
@@ -24,9 +30,10 @@ You can run `setup_dependencies.bat` or `setup_dependencies.sh` to setup the loc
     - Fetch your AWS Access and Secret Key from the AWS Console
     - Create `aws_provider.tf` under `terraform/` (this file will not be checked into the remote repository)
         ```
-        region = "${var.region}" {
-            access_key = "<YOUR AWS ACCESS KEY>"
-            secret_key = "<YOUR AWS SECRET KEY>"
+        provider "aws" {
+            region = "${var.region}"
+            access_key = "<YOUR AWS ACCESS KEY HERE>"
+            secret_key = "<YOUR AWS SECRET KEY HERE>"
         }
         ```
 
@@ -38,8 +45,6 @@ terraform apply
 
 Terraform apply stands up the AWS infrastructure & code needed to run the application.
 
-# How to Deploy using GitHub
-WIP
 
 ________________________
 
