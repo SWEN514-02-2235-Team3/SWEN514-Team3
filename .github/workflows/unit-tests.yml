@@ -38,5 +38,5 @@ jobs:
       - name: Terraform Plan
         run: | 
           cd terraform/
-          terraform plan -input=false -var "key_name=NotNeeded"
+          terraform plan -input=false
         shell: bash
