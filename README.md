@@ -8,6 +8,13 @@
 # Cloud Architecture
 ![image](https://github.com/jym2584/SWEN514-Team3/assets/67706639/521b4a72-9b17-487c-83f0-a2a8341443f4)
 ________________________
+# Dependencies
+- Node.js
+- Terraform
+  - https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli#install-terraform
+- Python
+
+You can run `setup_dependencies.bat` or `setup_dependencies.sh` to setup the local repository
 # How to Deploy Locally
 Install Terraform CLI
 Setup AWS credentials
