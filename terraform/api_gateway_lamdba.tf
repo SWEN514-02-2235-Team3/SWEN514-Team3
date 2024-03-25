@@ -5,9 +5,6 @@ data "archive_file" "lambda_api_gateway_code" {
   output_path = "../terraform_temp/lambda_api_gateway.zip" # store zip locally within a temp directory
 }
 
-
-
-
 # IAM Role
 resource "aws_iam_role" "lambda_api_gateway_role" {
   name               = "sa_lambda_api_gateway_role"
