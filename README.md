@@ -14,7 +14,8 @@ ________________________
   - https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli#install-terraform
 - Python
 
-You can run `setup_dependencies.bat` or `setup_dependencies.sh` to setup the local repository
+You can run `setup_dependencies.bat` or `setup_dependencies.sh` to setup the local repository or inspect the script and run the commands.
+
 # How to Deploy Locally
 **Pre-requisites**
 - Terraform CLI is installed
