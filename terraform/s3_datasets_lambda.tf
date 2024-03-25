@@ -42,7 +42,7 @@ resource "aws_lambda_function" "lambda_s3_datasets" {
 }
 
 
-# S3 Policies
+# AWS Managed Policies
 resource "aws_iam_role_policy_attachment" "lambda_s3_datasets_policy_attach" {
   for_each = toset([
     "arn:aws:iam::aws:policy/AmazonS3FullAccess", # s3 access

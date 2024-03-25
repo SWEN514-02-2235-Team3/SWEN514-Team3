@@ -40,10 +40,9 @@ resource "aws_lambda_function" "lambda_api_gateway_func" {
 }
 
 
-# S3 Policies
+# AWS Managed Policies
 resource "aws_iam_role_policy_attachment" "lambda_api_gateway_policy_attach" {
   for_each = toset([
-    "arn:aws:iam::aws:policy/AmazonS3FullAccess", # s3 access
     "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" # cloudwatch
   ])
 
