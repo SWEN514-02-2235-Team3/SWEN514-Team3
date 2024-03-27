@@ -127,7 +127,7 @@ resource "aws_s3_bucket_notification" "lambda_s3_datasets_trigger" {
 
   lambda_function {
     lambda_function_arn = aws_lambda_function.lambda_s3_datasets.arn
-    events              = ["s3:ObjectCreated:Put"]
+    events              = ["s3:ObjectCreated:*"]
     filter_suffix       = ".csv"
   }
 
