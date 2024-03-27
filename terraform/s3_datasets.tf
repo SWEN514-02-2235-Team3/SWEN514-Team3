@@ -4,18 +4,18 @@ S3 Bucket configuration to upload datasets from the github repository
 
 */
 resource "aws_s3_bucket" "s3_bucket_sentianalysis" {
-    bucket = "swen514-sentiment-analysis-data"
+  bucket = "swen514-sentiment-analysis-data"
 }
 
 /*
 Folder structure to store data sets
 */
 resource "aws_s3_object" "folder_structure" {
-    depends_on = [aws_s3_bucket.s3_bucket_sentianalysis]
-    bucket       = aws_s3_bucket.s3_bucket_sentianalysis.id
-    key          = "${each.value.folder}/"
-    content_type = "application/x-directory"
-    for_each     = { for dir in local.data_dirs : dir => { folder = dir } }
+  depends_on   = [aws_s3_bucket.s3_bucket_sentianalysis]
+  bucket       = aws_s3_bucket.s3_bucket_sentianalysis.id
+  key          = "${each.value.folder}/"
+  content_type = "application/x-directory"
+  for_each     = { for dir in local.data_dirs : dir => { folder = dir } }
 }
 
 /*
@@ -25,8 +25,8 @@ resource "aws_s3_object" "folder_structure" {
 */
 resource "time_sleep" "wait_before_uploading" {
   create_duration = "60s"
-  
-  depends_on = [ 
+
+  depends_on = [
     aws_s3_bucket_notification.lambda_s3_datasets_trigger,
     aws_dynamodb_table.db_sa_data,
     aws_s3_bucket.s3_bucket_sentianalysis,
@@ -39,12 +39,12 @@ resource "time_sleep" "wait_before_uploading" {
 Upload data sets to the s3 bucket
 */
 resource "aws_s3_object" "upload_dataset" {
-    depends_on = [time_sleep.wait_before_uploading]
+  depends_on = [time_sleep.wait_before_uploading]
 
-    for_each = { for file in local.csv_files : file.key => file }
-    
-    bucket = aws_s3_bucket.s3_bucket_sentianalysis.id
-    key    = each.value.key
-    source = each.value.path
-    etag   = filemd5(each.value.path)
+  for_each = { for file in local.csv_files : file.key => file }
+
+  bucket = aws_s3_bucket.s3_bucket_sentianalysis.id
+  key    = each.value.key
+  source = each.value.path
+  etag   = filemd5(each.value.path)
 }
