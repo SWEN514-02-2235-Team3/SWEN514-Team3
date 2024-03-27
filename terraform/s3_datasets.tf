@@ -4,7 +4,7 @@ S3 Bucket configuration to upload datasets from the github repository
 
 */
 resource "aws_s3_bucket" "s3_bucket_sentianalysis" {
-  bucket = "swen514-sentiment-analysis-data-${data.aws_iam_user.current.name}"
+  bucket = "swen514-sentiment-analysis-data"
 }
 
 /*
