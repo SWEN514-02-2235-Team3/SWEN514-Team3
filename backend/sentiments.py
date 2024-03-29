@@ -27,23 +27,7 @@ def lambda_handler(event, context):
                 'statusCode': 500,
                 'body': str(e)
             }
-    elif operation == 'POST':
-        try:
-            create_sentiment(event)
-            return {
-                'statusCode': 200,
-                'body': 'Entry created successfully'
-            }
-        except Exception as e:
-            print("Error:", e)
-            return {
-                'statusCode': 500,
-                'body': str(e)
-            }
-    elif operation == 'PUT':
-        pass
-    elif operation == 'DELETE':
-        pas
+    
     
 def get_sentiments(event):
     # Extract limit from event if present, default to 50 if not
@@ -85,24 +69,4 @@ def get_sentiments(event):
     # for item in items:
     #     print(item)
     return items
-    
-def create_sentiment(event):
-    
-    random_string = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(5))
-    
-    new_id = random_string
-    new_comment = event.get("comment")
-    new_comment_date = datetime.now().strftime('%Y-%m-%d')
-    new_sentiment = event.get("sentiment")
-    new_source = event.get("source")
-    
-    new_entry = {
-        'id': "1",
-        'comment': new_comment,
-        'comment_date': new_comment_date,
-        'sentiment': new_sentiment,
-        'source': new_source
-    }
-    
-    table.put_item(Item=new_entry)
     
