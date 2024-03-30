@@ -27,10 +27,10 @@ def lambda_handler(event, context):
         
         filter_expressions_unparsed = []
         # Add source to query
-        if platform in {"twitter", "youtube", "reddit"}:
+        if platform:
             filter_expressions_unparsed.append("platform = :platform")
             query_params['ExpressionAttributeValues'][':platform'] = platform
-        
+            
         # Extract date parameters and add them to the search query
         if date_range_from and date_range_to:
             from_date = datetime.strptime(date_range_from, "%Y-%m-%d").strftime('%Y-%m-%d')
