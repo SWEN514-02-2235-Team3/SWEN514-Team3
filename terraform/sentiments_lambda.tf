@@ -1,4 +1,4 @@
-# package up python code for datasets
+# package up python code for sentiments
 data "archive_file" "lambda_s3_sentiments_code" {
   type        = "zip"
   source_dir  = "../middleware/lambdas/api"           # since middleware/ is within the root repo 
