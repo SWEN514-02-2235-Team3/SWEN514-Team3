@@ -33,6 +33,14 @@ resource "aws_api_gateway_method" "get_sentiments_method" {
   resource_id   = aws_api_gateway_resource.sentiments_resource.id
   http_method   = "GET"
   authorization = "NONE"
+
+  request_parameters = {
+    "method.request.querystring.source"     = false,
+    "method.request.querystring.limit"      = false,
+    "method.request.header.date_range_from" = false,
+    "method.request.header.date_range_to"   = false
+  }
+
 }
 
 
@@ -53,5 +61,30 @@ resource "aws_api_gateway_integration" "lambda" {
   integration_http_method = "GET"
   type                    = "AWS_PROXY"
 
+  request_parameters = {
+    "integration.request.querystring.source"        = "method.request.querystring.source"
+    "integration.request.querystring.limit"         = "method.request.querystring.limit"
+    "integration.request.header.date_range_from"    = "method.request.header.date_range_from"
+    "integration.request.header.date_range_to"      = "method.request.header.date_range_to"
+  }
+
   uri                     = aws_lambda_function.get_sentiments.invoke_arn # Saranya's lambda function
 }
+
+/*
+    Method request
+        URL query string parameters
+            source
+            limit
+        HTTP request headers
+            date_range_from
+            date_range_to
+
+    Integration request
+        URL query string parameters
+            method.request.querystring.source
+            method.request.querystring.limit
+        HTTP request headers
+            method.request.header.date_range_from
+            method.request.header.date_range_to
+*/
