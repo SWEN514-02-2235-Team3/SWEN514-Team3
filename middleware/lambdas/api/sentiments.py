@@ -1,72 +1,74 @@
-import json
-import sys
 import boto3
-import random
-import string
-from boto3.dynamodb.conditions import Key, Attr
 from datetime import datetime
-
+import json
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('SentAnalysisDataResults')
-
+    
 def lambda_handler(event, context):
+    """GET sentiments/ endpoint lambda
+    """
+    try:
+        # get the parameters
+        parameters_query = event.get("queryStringParameters", {})
+        parameters_header = event.get("headers", {})
+        
+        # extract parameters
+        limit = int(parameters_query.get("limit", 50)) # default limit to 50 if source is not present
+        source = parameters_query.get("platform", "").strip()
+        date_range_from = parameters_header.get("date_range_from", "").strip()
+        date_range_to = parameters_header.get("date_range_to", "").strip()
+        
+        # dynamodb query parameters
+        query_params = {
+            'Limit': limit,
+            'ExpressionAttributeValues': dict()
+        }
+        
+        filter_expressions_unparsed = []
+        # Add source to query
+        if source in {"twitter", "youtube", "reddit"}:
+            filter_expressions_unparsed.append("platform = :platform")
+            query_params['ExpressionAttributeValues'][':platform'] = source
+        
+        # Extract date parameters and add them to the search query
+        if date_range_from and date_range_to:
+            from_date = datetime.strptime(date_range_from, "%Y-%m-%d").strftime('%Y-%m-%d')
+            to_date = datetime.strptime(date_range_to, "%Y-%m-%d").strftime('%Y-%m-%d')
+
+            filter_expressions_unparsed.append("comment_date BETWEEN :from_date AND :to_date")
+            query_params['ExpressionAttributeValues'][":from_date"] = from_date
+            query_params['ExpressionAttributeValues'][":to_date"] = to_date
+        
+        elif date_range_from:
+            from_date = datetime.strptime(date_range_from, "%Y-%m-%d").strftime('%Y-%m-%d')
+
+            filter_expressions_unparsed.append("comment_date >= :from_date")
+            query_params['ExpressionAttributeValues'][":from_date"] = from_date
     
-    operation = event.get('operation')
-    
-    if operation == 'GET':
-        try:
-            sentiments = get_sentiments(event)
-            return {
-                'statusCode': 200,
-                'body': sentiments
-            }
-        except Exception as e:
-            print("Error:", e)
-            return {
-                'statusCode': 500,
-                'body': str(e)
-            }
-    
-    
-def get_sentiments(event):
-    # Extract limit from event if present, default to 50 if not
-    query_limit = int(event.get("limit", 50))
-    query_scope = event.get("scope")
-    from_date_str = event.get("from_date")
-    to_date_str = event.get("to_date")
-    
-    filter_expression = None
-    
-    if from_date_str and to_date_str:
-        from_date = datetime.strptime(from_date_str, "%Y-%m-%d").strftime('%Y-%m-%d')
-        to_date = datetime.strptime(to_date_str, "%Y-%m-%d").strftime('%Y-%m-%d')
-        filter_expression = Key('comment_date').between(from_date, to_date)
-    elif from_date_str:
-        from_date = datetime.strptime(from_date_str, "%Y-%m-%d").strftime('%Y-%m-%d')
-        filter_expression = Key('comment_date').gte(from_date)
-    elif to_date_str:
-        to_date = datetime.strptime(to_date_str, "%Y-%m-%d").strftime('%Y-%m-%d')
-        filter_expression = Key('comment_date').lte(to_date)
-    
-    # Construct query parameters
-    query_params = {
-        'Limit': query_limit
-    }
-    
-    if query_scope:
-        query_params['FilterExpression'] = Key('source').eq(query_scope)
-    
-    if filter_expression:
-        if 'FilterExpression' in query_params:
-            query_params['FilterExpression'] = query_params['FilterExpression'] & filter_expression
-        else:
-            query_params['FilterExpression'] = filter_expression
-    
-    response = table.scan(**query_params)
-    
-    items = response['Items']
-    # for item in items:
-    #     print(item)
-    return items
-    
+        elif date_range_to:
+            to_date = datetime.strptime(date_range_to, "%Y-%m-%d").strftime('%Y-%m-%d')
+
+            filter_expressions_unparsed.append("comment_date <= :to_date")
+            query_params['ExpressionAttributeValues'][":to_date"] = to_date
+        
+        # combine each expression into a single expression
+        if filter_expressions_unparsed:
+            query_params['FilterExpression'] = ' AND '.join(filter_expressions_unparsed)
+        else: # if there are no paramaters then we don't need this anymore
+            query_params.pop("ExpressionAttributeValues")
+        
+        # retrieve dynamodb response from scan       
+        response = table.scan(**query_params)
+        
+        return {
+            'statusCode': 200,
+            'body': json.dumps(response['Items'])
+        }
+            
+    except Exception as e:
+        return {
+            'statusCode': 500,
+            'body': repr(e)
+        }
+        

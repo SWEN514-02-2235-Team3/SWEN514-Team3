@@ -64,16 +64,85 @@ resource "aws_api_gateway_integration" "lambda" {
   resource_id             = aws_api_gateway_resource.sentiments_resource.id
   http_method             = aws_api_gateway_method.get_sentiments_method.http_method
 
-  integration_http_method = "GET"
-  type                    = "AWS_PROXY"
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY" 
 
   uri                     = aws_lambda_function.get_sentiments.invoke_arn # Saranya's lambda function
-
+  credentials             = aws_iam_role.sa_api_gateway_role.arn
   request_parameters = {
     "integration.request.querystring.source"        = "method.request.querystring.source" # source = method.request.querystring.source
     "integration.request.querystring.limit"         = "method.request.querystring.limit"
     "integration.request.header.date_range_from"    = "method.request.header.date_range_from"
     "integration.request.header.date_range_to"      = "method.request.header.date_range_to"
   }
-
 }
+
+// sentiments GET - Integration response
+resource "aws_api_gateway_integration_response" "lambda_response_200" {
+  rest_api_id          = aws_api_gateway_rest_api.sa_api_gateway.id
+  resource_id          = aws_api_gateway_resource.sentiments_resource.id
+  http_method          = aws_api_gateway_method.get_sentiments_method.http_method
+  status_code          = "200"
+  response_templates = {
+    "application/json" = ""
+  }
+}
+
+// sentiments GET - Method response
+resource "aws_api_gateway_method_response" "get_sentiments_method_response_200" {
+  rest_api_id = aws_api_gateway_rest_api.sa_api_gateway.id
+  resource_id = aws_api_gateway_resource.sentiments_resource.id
+  http_method = aws_api_gateway_method.get_sentiments_method.http_method
+  status_code = "200"
+
+  response_models = {
+    "application/json" = "Empty"
+  }
+
+  response_parameters = {
+    "method.response.header.Content-Type" = true
+  }
+}
+
+/*
+    API GATEWAY PERMISSIONS
+*/
+
+// IAM Role
+resource "aws_iam_role" "sa_api_gateway_role" {
+  name               = "sa_api_gateway_role"
+  assume_role_policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "apigateway.amazonaws.com"
+      },
+      "Action": "sts:AssumeRole"
+    }]
+  })
+}
+
+// IAM Policy - Invoke Lambda
+resource "aws_iam_policy" "sa_api_gateway_lambda_policy" {
+  name   = "api_gateway_lambda_policy"
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Action": "lambda:InvokeFunction",
+      "Resource": aws_lambda_function.get_sentiments.arn
+    }]
+  })
+}
+
+// Attach Policy to API Gateway
+resource "aws_iam_role_policy_attachment" "sa_api_gateway_lambda_policy_attachment" {
+  policy_arn = aws_iam_policy.sa_api_gateway_lambda_policy.arn
+  role       = aws_iam_role.sa_api_gateway_role.name
+}
+
+/*
+    Enable CORS if needed
+*/
+
