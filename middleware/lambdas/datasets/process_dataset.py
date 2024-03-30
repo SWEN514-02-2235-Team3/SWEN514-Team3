@@ -54,7 +54,7 @@ def handler(event, context):
                         'comment_date': {'S': date},
                         'comment': {'S': comment},
                         'sentiment': {'S' : sentiment},
-                        'source': {'S': dataset_category},
+                        'platform': {'S': dataset_category},
                     }
                 )
                 break
