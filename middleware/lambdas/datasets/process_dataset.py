@@ -4,6 +4,7 @@ import io
 from dateutil.parser import parse
 import uuid
 import botocore.exceptions
+import timer
 
 # Boto Setup
 s3_client = boto3.client("s3")
@@ -22,12 +23,20 @@ def handler(event, context):
     print(to_print)
     print("-" * len(to_print))
    
+    reader = None
+
    # Parse through file
-    file = s3_client.get_object(Bucket=bucket_source, Key=dataset_filename) # get file from s3 bucket
-    content = file['Body'].read().decode('utf-8') # read contents
-    reader = csv.reader(io.StringIO(content)) # pass into csv reader
-    next(reader) # skip header
-    
+    for i in range(3):  
+        timer.sleep(1)
+        try:    
+            file = s3_client.get_object(Bucket=bucket_source, Key=dataset_filename) # get file from s3 bucket
+            content = file['Body'].read().decode('utf-8') # read contents
+            reader = csv.reader(io.StringIO(content)) # pass into csv reader
+            next(reader) # skip header
+            break
+        except KeyError as e:
+            print(e)
+            
     # iterate through the dataset (assuming the dataset has been edited to include these columns in order: date, comment)
     for row in reader:
         date = row[0]
