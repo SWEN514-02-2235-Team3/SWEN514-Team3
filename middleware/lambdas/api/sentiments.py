@@ -15,7 +15,7 @@ def lambda_handler(event, context):
         
         # extract parameters
         limit = int(parameters_query.get("limit", 50)) # default limit to 50 if source is not present
-        source = parameters_query.get("platform", "").strip()
+        platform = parameters_query.get("platform", "").strip()
         date_range_from = parameters_header.get("date_range_from", "").strip()
         date_range_to = parameters_header.get("date_range_to", "").strip()
         
@@ -27,9 +27,9 @@ def lambda_handler(event, context):
         
         filter_expressions_unparsed = []
         # Add source to query
-        if source in {"twitter", "youtube", "reddit"}:
+        if platform in {"twitter", "youtube", "reddit"}:
             filter_expressions_unparsed.append("platform = :platform")
-            query_params['ExpressionAttributeValues'][':platform'] = source
+            query_params['ExpressionAttributeValues'][':platform'] = platform
         
         # Extract date parameters and add them to the search query
         if date_range_from and date_range_to:
@@ -60,7 +60,7 @@ def lambda_handler(event, context):
         
         # retrieve dynamodb response from scan       
         response = table.scan(**query_params)
-        
+            
         return {
             'statusCode': 200,
             'body': json.dumps(response['Items'])
