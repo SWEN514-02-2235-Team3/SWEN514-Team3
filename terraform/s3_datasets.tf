@@ -24,7 +24,7 @@ resource "aws_s3_object" "folder_structure" {
     (i.e. lambdas)
 */
 resource "time_sleep" "wait_before_uploading" {
-  create_duration = "60s"
+  create_duration = "10s"
 
   depends_on = [
     aws_s3_bucket_notification.lambda_s3_datasets_trigger,
