@@ -141,3 +141,8 @@ resource "aws_iam_role_policy_attachment" "sa_api_gateway_lambda_policy_attachme
   policy_arn = aws_iam_policy.sa_api_gateway_lambda_policy.arn
   role       = aws_iam_role.sa_api_gateway_role.name
 }
+
+/*
+    Enable CORS if needed
+*/
+
