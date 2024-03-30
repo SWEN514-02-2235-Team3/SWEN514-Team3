@@ -118,8 +118,15 @@ const FormComponent = () => {
           )}
 
           {step === 2 && (
-            <Box>
-              <h2>Pick a start and end date for data</h2>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                width: "100%",
+                mt: 2,
+              }}
+            >
+              {/* <h2>Pick a start and end date for data</h2> */}
               <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <DatePicker
                   label="Start Date"
