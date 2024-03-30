@@ -3,12 +3,18 @@
 API Gateway Code Structure
 
 Main API Gateway (sa_api_gateway)
-    /sentiments
-        GET
-            headers: {
-                "source" (OPTIONAL): Filter source of the sentiment (i.e. twitter, reddit, youtube)
-                "sentiment" (OPTIONAL): Filter by sentiment (POSITIVE/NEGATIVE/NEUTRAL/MIXED)
-            }
+    GET sentiments/
+        Query Parameter:
+        source (str OPTIONAL): Filter by source (i.e. facebook, twitter).
+            > If no input is provided then it checks all sources
+        limit (str default=30): Limit on how many records to
+            > If no input is provided then the default is 30
+
+        Request Body:
+        date_range_from (default=None): Start filter
+            > If no input is provided then it checks from the earliest record
+        date_range_to (default=now): End filter
+            > now is at the time of request
 
 ************************/
 
@@ -64,28 +70,10 @@ resource "aws_api_gateway_integration" "lambda" {
   uri                     = aws_lambda_function.get_sentiments.invoke_arn # Saranya's lambda function
 
   request_parameters = {
-    "integration.request.querystring.source"        = "method.request.querystring.source"
+    "integration.request.querystring.source"        = "method.request.querystring.source" # source = method.request.querystring.source
     "integration.request.querystring.limit"         = "method.request.querystring.limit"
     "integration.request.header.date_range_from"    = "method.request.header.date_range_from"
     "integration.request.header.date_range_to"      = "method.request.header.date_range_to"
   }
 
 }
-
-/*
-    Method request
-        URL query string parameters
-            source
-            limit
-        HTTP request headers
-            date_range_from
-            date_range_to
-
-    Integration request
-        URL query string parameters
-            method.request.querystring.source
-            method.request.querystring.limit
-        HTTP request headers
-            method.request.header.date_range_from
-            method.request.header.date_range_to
-*/
