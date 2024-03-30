@@ -9,7 +9,7 @@ data "archive_file" "lambda_s3_sentiments_code" {
 resource "aws_lambda_function" "get_sentiments" {
   filename      = data.archive_file.lambda_s3_sentiments_code.output_path
   function_name = "get_sentiments"
-  role          = aws_iam_role.lambda_execution_role.arn
+  role          = aws_iam_role.lambda_s3_sentiments_role.arn
   handler       = "sentiments.lambda_handler"
   runtime       = "python3.10"
   
@@ -20,40 +20,70 @@ resource "aws_lambda_function" "get_sentiments" {
   }
 }
 
-# iam role
-resource "aws_iam_role" "lambda_execution_role" {
-  name               = "lambda_execution_role"
+# IAM Role
+resource "aws_iam_role" "lambda_s3_sentiments_role" {
+  name = "sa_lambda_sentiments_role"
+
   assume_role_policy = jsonencode({
-    "Version" : "2012-10-17",
-    "Statement" : [
+    Version = "2012-10-17"
+    Statement = [
       {
-        "Effect" : "Allow",
-        "Principal" : {
-          "Service" : "lambda.amazonaws.com"
-        },
-        "Action" : "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+        Action = "sts:AssumeRole"
       }
     ]
   })
+
+  depends_on = [aws_dynamodb_table.db_sa_data]
+}
+# AWS Managed Policies
+resource "aws_iam_role_policy_attachment" "lambda_s3_sentiments_policy_attach" {
+  for_each = toset([
+    "arn:aws:iam::aws:policy/AmazonS3FullAccess",                      # s3 access
+    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" # cloudwatch
+  ])
+
+  role       = aws_iam_role.lambda_s3_sentiments_role.name
+  policy_arn = each.key
+
+  depends_on = [aws_iam_role.lambda_s3_sentiments_role]
 }
 
-# iam policy
-resource "aws_iam_policy" "dynamodb_full_access" {
-  name   = "dynamodb_full_access"
+# DynamoDB policy
+resource "aws_iam_role_policy" "lambda_s3_sentiments_policy_dynamodb" {
+  name = "sa_dynamodb_policy"
+  role = aws_iam_role.lambda_s3_sentiments_role.name
   policy = jsonencode({
-    "Version": "2012-10-17",
-    "Statement": [
+    Version = "2012-10-17"
+    Statement = [
       {
-        "Effect": "Allow",
-        "Action": "dynamodb:*",
-        "Resource": "*"
+        Sid    = "VisualEditor0"
+        Effect = "Allow"
+        Action = [
+          "dynamodb:BatchGetItem",
+          "dynamodb:PutItem",
+          "dynamodb:PartiQLSelect",
+          "dynamodb:DescribeTable",
+          "dynamodb:GetShardIterator",
+          "dynamodb:GetItem",
+          "dynamodb:DescribeContinuousBackups",
+          "dynamodb:Scan",
+          "dynamodb:Query",
+          "dynamodb:GetRecords"
+        ]
+        Resource = "arn:aws:dynamodb:${var.region}:${data.aws_caller_identity.current.account_id}:table/${aws_dynamodb_table.db_sa_data.name}"
+      },
+      {
+        Sid      = "VisualEditor1"
+        Effect   = "Allow"
+        Action   = "dynamodb:ListStreams"
+        Resource = "*"
       }
     ]
   })
-}
 
-# role attachment
-resource "aws_iam_role_policy_attachment" "lambda_dynamodb_policy_attachment" {
-  policy_arn = aws_iam_policy.dynamodb_full_access.arn
-  role       = aws_iam_role.lambda_execution_role.name
+  depends_on = [aws_iam_role.lambda_s3_sentiments_role]
 }
