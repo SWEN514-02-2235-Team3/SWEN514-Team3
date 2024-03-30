@@ -27,7 +27,7 @@ resource "aws_api_gateway_resource" "sentiments_resource" {
   path_part   = "sentiments"
 }
 
-// GET sentiments/
+// GET sentiments/ (method request)
 resource "aws_api_gateway_method" "get_sentiments_method" {
   rest_api_id   = aws_api_gateway_rest_api.sa_api_gateway.id
   resource_id   = aws_api_gateway_resource.sentiments_resource.id
@@ -52,7 +52,7 @@ resource "aws_api_gateway_deployment" "sa_api_gateway_deployment" {
   description   = "Development Stage"
 }
 
-// sentiments GET - Invoke Lambda function  
+// sentiments GET - Invoke Lambda function (integration request)
 resource "aws_api_gateway_integration" "lambda" {
   rest_api_id             = aws_api_gateway_rest_api.sa_api_gateway.id
   resource_id             = aws_api_gateway_resource.sentiments_resource.id
@@ -61,6 +61,8 @@ resource "aws_api_gateway_integration" "lambda" {
   integration_http_method = "GET"
   type                    = "AWS_PROXY"
 
+  uri                     = aws_lambda_function.get_sentiments.invoke_arn # Saranya's lambda function
+
   request_parameters = {
     "integration.request.querystring.source"        = "method.request.querystring.source"
     "integration.request.querystring.limit"         = "method.request.querystring.limit"
@@ -68,7 +70,6 @@ resource "aws_api_gateway_integration" "lambda" {
     "integration.request.header.date_range_to"      = "method.request.header.date_range_to"
   }
 
-  uri                     = aws_lambda_function.get_sentiments.invoke_arn # Saranya's lambda function
 }
 
 /*
