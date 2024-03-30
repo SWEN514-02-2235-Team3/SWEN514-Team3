@@ -15,7 +15,7 @@ resource "aws_lambda_function" "get_sentiments" {
   
   environment {
     variables = {
-      TABLE_NAME = "SentAnalysisDataResults"
+      TABLE_NAME = aws_dynamodb_table.db_sa_data.name
     }
   }
 }
