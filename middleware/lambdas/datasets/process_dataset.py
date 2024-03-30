@@ -4,7 +4,7 @@ import io
 from dateutil.parser import parse
 import uuid
 import botocore.exceptions
-import timer
+import time
 
 # Boto Setup
 s3_client = boto3.client("s3")
@@ -27,7 +27,7 @@ def handler(event, context):
 
    # Parse through file
     for i in range(3):  
-        timer.sleep(1)
+        time.sleep(1)
         try:    
             file = s3_client.get_object(Bucket=bucket_source, Key=dataset_filename) # get file from s3 bucket
             content = file['Body'].read().decode('utf-8') # read contents
