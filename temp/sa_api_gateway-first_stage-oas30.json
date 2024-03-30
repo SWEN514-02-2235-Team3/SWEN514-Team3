@@ -1,0 +1,67 @@
+{
+  "openapi" : "3.0.1",
+  "info" : {
+    "title" : "sa_api_gateway",
+    "description" : "SWEN 514 Sentiment Analysis API Gateway",
+    "version" : "2024-03-29T00:17:18Z"
+  },
+  "servers" : [ {
+    "url" : "https://r7r9zb95yk.execute-api.us-east-1.amazonaws.com/{basePath}",
+    "variables" : {
+      "basePath" : {
+        "default" : "first_stage"
+      }
+    }
+  } ],
+  "paths" : {
+    "/sentiments" : {
+      "get" : {
+        "parameters" : [ {
+          "name" : "date_range_to",
+          "in" : "header",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "limit",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "source",
+          "in" : "query",
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "date_range_from",
+          "in" : "header",
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "200 response",
+            "content" : {
+              "application/json" : {
+                "schema" : {
+                  "$ref" : "#/components/schemas/Empty"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components" : {
+    "schemas" : {
+      "Empty" : {
+        "title" : "Empty Schema",
+        "type" : "object"
+      }
+    }
+  }
+}

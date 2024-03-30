@@ -4,7 +4,7 @@ S3 Bucket configuration to upload datasets from the github repository
 
 */
 resource "aws_s3_bucket" "s3_bucket_sentianalysis" {
-  bucket = "swen514-sentiment-analysis-data"
+  bucket = "swen514-sa-datasets-${lower(random_string.bucket_suffix.result)}" # need random string because s3 buckets always has to be unique for all aws uesrs
 }
 
 /*
@@ -24,7 +24,7 @@ resource "aws_s3_object" "folder_structure" {
     (i.e. lambdas)
 */
 resource "time_sleep" "wait_before_uploading" {
-  create_duration = "60s"
+  create_duration = "10s"
 
   depends_on = [
     aws_s3_bucket_notification.lambda_s3_datasets_trigger,
