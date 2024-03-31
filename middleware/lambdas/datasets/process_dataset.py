@@ -6,8 +6,6 @@ import uuid
 import botocore.exceptions
 import logging
 
-logger = logging.Logger()
-
 # Boto Setup
 s3_client = boto3.client("s3")
 comprehend_client = boto3.client("comprehend")
@@ -47,7 +45,7 @@ def handler(event, context):
         
 
         # Generate a non-blocking UUID and insert record to dynamodb
-        for i in range(3):
+        for _ in range(3):
             try:
                 dynamodb_client.put_item(
                     TableName="SentAnalysisDataResults",
@@ -59,15 +57,15 @@ def handler(event, context):
                         'platform': {'S': dataset_category},
                     }
                 )
-                logger.info(f"[{date}][{dataset_category}] {sentiment}: {comment}")   
+                print(f"INFO: [{date}][{dataset_category}] {sentiment}: {comment}")   
                 break # break the loop 
             except botocore.exceptions.ClientError: # dont process dataset
-                logger.warning(f"Couldn't upload {row} to dynamodb...")
+                print(f"WARNING: Couldn't upload {row} to dynamodb...")
     
     # delete processed object
     s3_client.delete_object(Bucket=bucket_source, Key=dataset_filename)
     # create empty text file saying that the file has been processed
-    filename_processed = f"{dataset_filename.rsplit("/").rsplit(".")[0]}_PROCESSED.txt"
+    filename_processed = f"{dataset_filename.split('/')[1].split('.')[0]}_PROCESSED.txt"
     with open(filename_processed, 'a') as file:
         pass
     s3_client.put_object(Bucket=bucket_source, Key=f"{dataset_category}/{filename_processed}", Body=open(filename_processed, 'rb'))

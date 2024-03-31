@@ -12,6 +12,7 @@ resource "aws_lambda_function" "get_sentiments" {
   role          = aws_iam_role.lambda_s3_sentiments_role.arn
   handler       = "sentiments.lambda_handler"
   runtime       = "python3.10"
+  timeout       = 60 # 1 minute timeout
   
   environment {
     variables = {

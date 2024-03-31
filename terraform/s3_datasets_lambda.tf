@@ -32,11 +32,12 @@ resource "aws_iam_role" "lambda_s3_datasets_role" {
 
 # S3 Lambda function for datasets
 resource "aws_lambda_function" "lambda_s3_datasets" {
-  function_name = "swen514-sa-datasets"
+  function_name = "swen514-datasets-lambda-${formatdate("YYYY-MM-DD-HH-MM", timestamp())}"
   role          = aws_iam_role.lambda_s3_datasets_role.arn
   runtime       = "python3.9"
   handler       = "process_dataset.handler"
   filename      = data.archive_file.lambda_s3_datasets_code.output_path
+  timeout       = 300 # 5 minute timeout
 
   depends_on = [aws_iam_role_policy_attachment.lambda_s3_datasets_policy_attach]
 }
