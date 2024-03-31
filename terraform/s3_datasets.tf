@@ -23,17 +23,17 @@ resource "aws_s3_object" "folder_structure" {
     time for AWS to fully create the necessary resources
     (i.e. lambdas)
 */
-resource "time_sleep" "wait_before_uploading" {
-  create_duration = "10s"
+# resource "time_sleep" "wait_before_uploading" {
+#   create_duration = "10s"
 
-  depends_on = [
-    aws_s3_bucket_notification.lambda_s3_datasets_trigger,
-    aws_dynamodb_table.db_sa_data,
-    aws_s3_bucket.s3_bucket_sentianalysis,
-    aws_s3_object.folder_structure,
-    aws_lambda_function.lambda_s3_datasets
-  ]
-}
+#   depends_on = [
+#     aws_s3_bucket_notification.lambda_s3_datasets_trigger,
+#     aws_dynamodb_table.db_sa_data,
+#     aws_s3_bucket.s3_bucket_sentianalysis,
+#     aws_s3_object.folder_structure,
+#     aws_lambda_function.lambda_s3_datasets
+#   ]
+# }
 
 
 # /*
