@@ -66,9 +66,9 @@ def handler(event, context):
     s3_client.delete_object(Bucket=bucket_source, Key=dataset_filename)
     # create empty text file saying that the file has been processed
     filename_processed = f"{dataset_filename.split('/')[1].split('.')[0]}_PROCESSED.txt"
-    with open(filename_processed, 'a') as file:
+    with open(f"tmp/{filename_processed}", 'w') as file:
         pass
-    s3_client.put_object(Bucket=bucket_source, Key=f"{dataset_category}/{filename_processed}", Body=open(filename_processed, 'rb'))
+    s3_client.put_object(Bucket=bucket_source, Key=f"{dataset_category}/{filename_processed}", Body=open(f"tmp/{filename_processed}", 'rb'))
     print("*************************************************")
     print("****************PROCESSED DATASET****************")
     print("*************************************************")
