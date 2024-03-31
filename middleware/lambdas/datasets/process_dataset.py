@@ -4,6 +4,9 @@ import io
 from dateutil.parser import parse
 import uuid
 import botocore.exceptions
+import logging
+
+logger = logging.Logger()
 
 # Boto Setup
 s3_client = boto3.client("s3")
@@ -42,11 +45,10 @@ def handler(event, context):
         
         sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment'] # positive, negative, or neutral        
         
-        retry_attempts = 0
+
         # Generate a non-blocking UUID and insert record to dynamodb
-        while True:
+        for i in range(3):
             try:
-                if retry_attempts > 3: break # stop trying to process a uuid
                 dynamodb_client.put_item(
                     TableName="SentAnalysisDataResults",
                     Item={
@@ -57,14 +59,10 @@ def handler(event, context):
                         'platform': {'S': dataset_category},
                     }
                 )
-                break
-            except botocore.exceptions.ClientError:
-                retry_attempts+=1
-                continue # try again until there is no collisions
-        
-        if retry_attempts > 3: continue # continue to the next row if we can't generate a uuid for some reason
-        
-        print(f"[{date}][{dataset_category}] {sentiment}: {comment}")   
+                logger.info(f"[{date}][{dataset_category}] {sentiment}: {comment}")   
+                break # break the loop 
+            except botocore.exceptions.ClientError: # dont process dataset
+                logger.warning(f"Couldn't upload {row} to dynamodb...")
     
     # delete processed object
     s3_client.delete_object(Bucket=bucket_source, Key=dataset_filename)
