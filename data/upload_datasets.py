@@ -10,14 +10,16 @@ Requires AWS credentials through either:
 
 import boto3
 import os
-import shutil
+import time
 import platform
 import re
-import getpass
 import glob
 SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__)) # assumes that this script lies <root_repo>/data/
 s3_client = None
-
+lambda_client = None
+cloudwatch_client = None
+ACCESS_KEY = None
+SECRET_KEY = None
 
 def get_credentials_from_terraform(path=f"{SCRIPT_PATH}/../terraform/aws_provider.tf"):
     """Gets AWS credentials from a terraform file
@@ -30,12 +32,21 @@ def get_credentials_from_terraform(path=f"{SCRIPT_PATH}/../terraform/aws_provide
         access_key_match = access_key_pattern.search(file_content)
         secret_key_match = secret_key_pattern.search(file_content)
 
-        if access_key_match and secret_key_match:
-            access_key = access_key_match.group(1)
-            secret_key = secret_key_match.group(1)
-            global s3_client
-            s3_client = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
-            return True
+    if access_key_match and secret_key_match:
+        access_key = access_key_match.group(1)
+        secret_key = secret_key_match.group(1)
+        global s3_client
+        global lambda_client
+        global cloudwatch_client
+        global ACCESS_KEY
+        global SECRET_KEY
+        ACCESS_KEY = access_key
+        SECRET_KEY = secret_key
+        s3_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
+        lambda_client = boto3.client('lambda', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
+        cloudwatch_client = boto3.client('logs', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
+        return True
+    return False
 
 def get_credentials_from_aws_config():
     """Gets AWS credentials from AWS config
@@ -53,7 +64,15 @@ def get_credentials_from_aws_config():
     
     if access_key and secret_key:
         global s3_client
-        s3_client = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
+        global lambda_client
+        global cloudwatch_client
+        global ACCESS_KEY
+        global SECRET_KEY
+        ACCESS_KEY = access_key
+        SECRET_KEY = secret_key
+        s3_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
+        lambda_client = boto3.client('lambda', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
+        cloudwatch_client = boto3.client('logs', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
         return True
     return False
 
@@ -67,7 +86,7 @@ def s3_get_bucket_name(bucket_regex="swen514-sa-datasets"):
             bucket_name = bucket['Name']
             return bucket_name
     if not bucket_name:
-        raise ValueError(f"{bucket_regex} doesn't exist in the AWS Console. Have you deployed the terraform config?")
+        raise ValueError(f"{bucket_regex} doesn't exist in the AWS Console. Have you deployed the terraform infrastructure?")
         
     
 
@@ -109,6 +128,35 @@ def s3_upload_files(bucket_name, datasets_name):
                 print(f"\t{filename}")
     print("Done!")
 
+def get_datasets_lambda(lambda_regex="swen514-datasets-lambda"):
+    response = lambda_client.list_functions()
+    for fun in response['Functions']:
+        if lambda_regex in fun['FunctionName']:
+            return fun['FunctionName']
+    
+    raise ValueError(f"{lambda_regex} doesn't exist in the AWS Console. Have you deployed the terraform infrastructure?")
+
+def delete_lambda_logs(lambda_log_group_name):
+    response = cloudwatch_client.describe_log_groups()
+    for log_group in response['logGroups']:
+        if lambda_log_group_name == log_group['logGroupName']:
+            cloudwatch_client.delete_log_group(logGroupName=lambda_log_group_name)
+            print(f"Log group '{lambda_log_group_name}' deleted.")
+    
+def check_if_lambda_logs_generated(lambda_log_group_name, bucket_name):
+    response = cloudwatch_client.describe_log_groups()
+    if not response:
+        return False
+
+    for event in response['logGroups']:
+        if lambda_log_group_name == event['logGroupName']:
+            s3_client.delete_object(Bucket=bucket_name,Key="upload_datasets_test.csv")
+            return True
+    
+    s3_client.upload_file(f"{SCRIPT_PATH}/upload_datasets_test.csv", bucket_name, "upload_datasets_test.csv")
+    s3_client.delete_object(Bucket=bucket_name,Key="upload_datasets_test.csv")
+    return False
+
 def main():
     credentials_found = False
     while not credentials_found:
@@ -136,7 +184,7 @@ def main():
     datasets_input = None
     while True:
         try:
-            print("Specify which datasets you want to use (number input):\n\t(1) datasets_test\n\t(2) datasets_full\n\t(3) Just delete the files from s3")
+            print("Specify which datasets you want to use (number input):\n\t(1) datasets_test\n\t(2) datasets_full\n")
             datasets_input = int(input(">> "))
             if datasets_input == 1:
                 datasets_input = "datasets_test"
@@ -144,17 +192,33 @@ def main():
             elif datasets_input == 2:
                 datasets_input = "datasets_full"
                 break
-            elif datasets_input == 3:
-                datasets_input = None
-                break
             else:
                 print("Invalid input")
         except: pass
-        
+    
+    # get the s3 bucket and delete the files associated with the bucket
+    print("**************DELETING FILES FROM S3**************")
     bucket_name = s3_get_bucket_name()
     s3_delete_files(bucket_name)
-    if datasets_input:
-        s3_upload_files(bucket_name, datasets_input)
+    
+    print("\n\n")
+    print("**************CHECK IF S3 TRIGGER IS FULLY INITIALIZED**************")
+    lambda_func_name = get_datasets_lambda() # get current lambda log deployed
+    group_name = f"/aws/lambda/{lambda_func_name}" # get log group of current lambda
+    delete_lambda_logs(group_name) # delete logs of associated lambda (currently deployed)
+    
+    logs_generated = check_if_lambda_logs_generated(group_name, bucket_name) # check if the currently deployed lambda has logs
+    print("Waiting 10 seconds before checking if logs are generated",end="")
+    while not logs_generated:
+        print(".", end="")
+        time.sleep(10)
+        logs_generated = check_if_lambda_logs_generated(group_name, bucket_name)
+    print()
+    print("***S3 trigger is fully initialized!***")
+    delete_lambda_logs(group_name) # delete test logs once we know the lambda is now deployed
+    print("\n\n")
+    s3_upload_files(bucket_name, datasets_input)
     
 if __name__ == "__main__":
     main()
+    pass
