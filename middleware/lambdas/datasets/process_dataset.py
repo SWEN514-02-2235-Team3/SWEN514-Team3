@@ -4,7 +4,6 @@ import io
 from dateutil.parser import parse
 import uuid
 import botocore.exceptions
-import logging
 
 # Boto Setup
 s3_client = boto3.client("s3")
@@ -25,7 +24,7 @@ def handler(event, context):
    
    # Parse through file
     file = s3_client.get_object(Bucket=bucket_source, Key=dataset_filename) # get file from s3 bucket
-    content = file['Body'].read().decode('utf-8') # read contents
+    content = file['Body'].read().decode('utf-8-sig') # read contents
     reader = csv.reader(io.StringIO(content)) # pass into csv reader
     next(reader) # skip header
     
@@ -66,9 +65,7 @@ def handler(event, context):
     s3_client.delete_object(Bucket=bucket_source, Key=dataset_filename)
     # create empty text file saying that the file has been processed
     filename_processed = f"{dataset_filename.split('/')[1].split('.')[0]}_PROCESSED.txt"
-    with open(f"tmp/{filename_processed}", 'w+') as file:
-        pass
-    s3_client.put_object(Bucket=bucket_source, Key=f"{dataset_category}/{filename_processed}", Body=open(f"tmp/{filename_processed}", 'rb'))
+    s3_client.put_object(Bucket=bucket_source, Key=f"{dataset_category}/{filename_processed}", Body=open(f"tmp/{filename_processed}", 'w+'))
     print("*************************************************")
     print("****************PROCESSED DATASET****************")
     print("*************************************************")
