@@ -1,5 +1,5 @@
 """
-Run `upload_datasets.py` to upload the datasets to the s3 bucket.
+Run `upload_datasets.py` to upload the datasets to the s3 bucket after the AWS infrastructure is deployed.
 
 Requires AWS credentials through either:
     - terraform/aws_provider.tf
