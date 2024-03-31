@@ -210,13 +210,14 @@ def main():
     group_name = f"/aws/lambda/{lambda_func_name}" # get log group of current lambda
     delete_lambda_logs(group_name) # delete logs of associated lambda (if it exists)
     
-    print("Waiting 60 seconds before checking if lambda logs are generated...")
+    print("Waiting before checking if the s3 trigger is initialized (60s)...")
     time.sleep(60)
+    print("Checking if the s3 trigger is initialized...")
     logs_generated = check_if_lambda_logs_generated(group_name, bucket_name) # check if the currently deployed lambda has logs
     while not logs_generated:
+        print("Still waiting (10s)...")
         time.sleep(10)
         logs_generated = check_if_lambda_logs_generated(group_name, bucket_name)
-        print("Still waiting (10s)...")
     print()
     print("***S3 trigger is fully initialized!***")
     delete_lambda_logs(group_name) # delete test logs once we know the lambda is now deployed
