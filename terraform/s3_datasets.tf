@@ -36,16 +36,16 @@ resource "time_sleep" "wait_before_uploading" {
 }
 
 
-/*
-Upload data sets to the s3 bucket
-*/
-resource "aws_s3_object" "upload_dataset" {
-  depends_on = [time_sleep.wait_before_uploading]
+# /*
+# Upload data sets to the s3 bucket
+# */
+# resource "aws_s3_object" "upload_dataset" {
+#   depends_on = [time_sleep.wait_before_uploading]
 
-  for_each = { for file in local.csv_files : file.key => file }
+#   for_each = { for file in local.csv_files : file.key => file }
 
-  bucket = aws_s3_bucket.s3_bucket_sentianalysis.id
-  key    = each.value.key
-  source = each.value.path
-  etag   = filemd5(each.value.path)
-}
+#   bucket = aws_s3_bucket.s3_bucket_sentianalysis.id
+#   key    = each.value.key
+#   source = each.value.path
+#   etag   = filemd5(each.value.path)
+# }
