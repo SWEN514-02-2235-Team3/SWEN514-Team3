@@ -9,7 +9,7 @@ SCRIPT_PATH = os.path.dirname(os.path.realpath(__file__)) # assumes that this sc
 s3_client = None
 
 
-def get_credentials_from_terraform(path="{SCRIPT_PATH}/../terraform/aws_provider.tf"):
+def get_credentials_from_terraform(path=f"{SCRIPT_PATH}/../terraform/aws_provider.tf"):
     """Gets AWS credentials from a terraform file
     """
     access_key_pattern = re.compile(r'access_key\s*=\s*"([^"]+)"')
@@ -28,6 +28,8 @@ def get_credentials_from_terraform(path="{SCRIPT_PATH}/../terraform/aws_provider
             return True
 
 def get_credentials_from_aws_config():
+    """Gets AWS credentials from AWS config
+    """
     plat = platform.system()
     credentials_path = None
     if plat == "Windows": credentials_path = f"C:/Users/{os.getenv('USERPROFILE').split('\\')[-1]}/.aws/credentials"
@@ -46,6 +48,8 @@ def get_credentials_from_aws_config():
     return False
     
 def s3_upload_files(bucket_regex="swen514-sa-datasets"):
+    """Upload files to s3
+    """
     # get s3 bucket
     response = s3_client.list_buckets()
     bucket_name = None

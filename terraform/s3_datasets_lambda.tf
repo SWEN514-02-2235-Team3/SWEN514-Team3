@@ -32,7 +32,7 @@ resource "aws_iam_role" "lambda_s3_datasets_role" {
 
 # S3 Lambda function for datasets
 resource "aws_lambda_function" "lambda_s3_datasets" {
-  function_name = "swen514-datasets-lambda_${formatdate("YYYY-MM-DD-hh:mm:ss", timestamp())}"
+  function_name = "swen514-datasets-lambda_${formatdate("YYYY-MM-DD-hh-mm-ss", timestamp())}"
   role          = aws_iam_role.lambda_s3_datasets_role.arn
   runtime       = "python3.9"
   handler       = "process_dataset.handler"

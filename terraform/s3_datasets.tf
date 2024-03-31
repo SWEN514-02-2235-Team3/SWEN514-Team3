@@ -30,7 +30,8 @@ resource "time_sleep" "wait_before_uploading" {
     aws_s3_bucket_notification.lambda_s3_datasets_trigger,
     aws_dynamodb_table.db_sa_data,
     aws_s3_bucket.s3_bucket_sentianalysis,
-    aws_s3_object.folder_structure
+    aws_s3_object.folder_structure,
+    aws_lambda_function.lambda_s3_datasets
   ]
 }
 
