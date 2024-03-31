@@ -210,8 +210,9 @@ def main():
     group_name = f"/aws/lambda/{lambda_func_name}" # get log group of current lambda
     delete_lambda_logs(group_name) # delete logs of associated lambda (if it exists)
     
+    print("Waiting 60 seconds before checking if lambda logs are generated...")
+    time.sleep(60)
     logs_generated = check_if_lambda_logs_generated(group_name, bucket_name) # check if the currently deployed lambda has logs
-    print("Waiting 10 seconds before checking if lambda logs are generated...")
     while not logs_generated:
         time.sleep(10)
         logs_generated = check_if_lambda_logs_generated(group_name, bucket_name)
