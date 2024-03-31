@@ -112,7 +112,7 @@ resource "aws_iam_role_policy" "lambda_s3_datasets_policy_comprehend" {
 
 # Add permission
 resource "aws_lambda_permission" "lambda_s3_trigger_source" {
-  statement_id  = "AllowS3Invoke"
+  statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_s3_datasets.function_name
   principal     = "s3.amazonaws.com"
