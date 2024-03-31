@@ -46,50 +46,46 @@ def get_credentials_from_aws_config():
         s3_client = boto3.client('s3', aws_access_key_id=access_key, aws_secret_access_key=secret_key)
         return True
     return False
-    
-def s3_upload_files(bucket_regex="swen514-sa-datasets"):
-    """Upload files to s3
+
+def s3_get_bucket_name(bucket_regex="swen514-sa-datasets"):
+    """Gets the full bucket name from a partial name
     """
-    # get s3 bucket
     response = s3_client.list_buckets()
     bucket_name = None
     for bucket in response['Buckets']:
         if re.match(bucket_regex, bucket['Name']):
             bucket_name = bucket['Name']
+            return bucket_name
     if not bucket_name:
-        print(f"{bucket_regex} doesn't exist in the AWS Console. Have you deployed the terraform config?")
-        return
+        raise ValueError(f"{bucket_regex} doesn't exist in the AWS Console. Have you deployed the terraform config?")
+        
     
-    # datasets input
-    datasets_input = None
-    while True:
-        try:
-            print("Specify which datasets you want to use (number input):\n\t(1) datasets_test\n\t(2) datasets_full")
-            datasets_input = int(input(">> "))
-            if datasets_input == 1:
-                datasets_input = "datasets_test"
-                break
-            elif datasets_input == 2:
-                datasets_input = "datasets_full"
-        except: pass
-    
-    print("Deleting all objects from s3...")
+
+def s3_delete_files(bucket_name):
+    """Deletes files from s3 bucket
+    """
+    print(f"Deleting all objects from s3:{bucket_name}...")
     response = s3_client.list_objects_v2(Bucket=bucket_name)
     if 'Contents' in response:
         objects = [{'Key': obj['Key']} for obj in response['Contents'] if ".csv" in obj['Key']]
         try:
             response = s3_client.delete_objects(Bucket=bucket_name, Delete={'Objects': objects})
-            print(f"Deleted .csv files from s3:{bucket_regex}")
+            print(f"Deleted .csv files from s3:{bucket_name}")
         except Exception as e:
-            print(f".csv files from s3:{bucket_regex} has already been deleted.")
-   
+            print(f".csv files from s3:{bucket_name} has already been deleted.")
+            
+def s3_upload_files(bucket_name, datasets_name):
+    """Upload files to s3
+    
+    datasets_name is either datasets_full or datasets_test
+    """      
     # upload files to s3
-    to_print = f"Uploading {datasets_input} files to s3:{bucket_name}..."
+    to_print = f"Uploading {datasets_name} files to s3:{bucket_name}..."
     print("-" * len(to_print))
     print(to_print)
     print("-" * len(to_print))
     
-    subdir_path = os.path.join(SCRIPT_PATH, datasets_input)
+    subdir_path = os.path.join(SCRIPT_PATH, datasets_name)
     for foldername in os.listdir(subdir_path): # Iterate through each subfolder in the current subdirectory
         folder_path = os.path.join(subdir_path, foldername)
         
@@ -125,9 +121,30 @@ def main():
                 credentials_valid = True
             except:
                 print("AWS Credentials are not valid")
-    
-    
-    s3_upload_files()
+                
+    # datasets input
+    datasets_input = None
+    while True:
+        try:
+            print("Specify which datasets you want to use (number input):\n\t(1) datasets_test\n\t(2) datasets_full\n\t(3) Just delete the files from s3")
+            datasets_input = int(input(">> "))
+            if datasets_input == 1:
+                datasets_input = "datasets_test"
+                break
+            elif datasets_input == 2:
+                datasets_input = "datasets_full"
+                break
+            elif datasets_input == 3:
+                datasets_input = None
+                break
+            else:
+                print("Invalid input")
+        except: pass
+        
+    bucket_name = s3_get_bucket_name()
+    s3_delete_files(bucket_name)
+    if datasets_input:
+        s3_upload_files(bucket_name, datasets_input)
     
 if __name__ == "__main__":
     main()
