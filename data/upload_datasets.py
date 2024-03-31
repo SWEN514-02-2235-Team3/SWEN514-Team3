@@ -138,6 +138,8 @@ def get_datasets_lambda(lambda_regex="swen514-datasets-lambda"):
 
 def delete_lambda_logs(lambda_log_group_name):
     response = cloudwatch_client.describe_log_groups()
+    if not response:
+        return
     for log_group in response['logGroups']:
         if lambda_log_group_name == log_group['logGroupName']:
             cloudwatch_client.delete_log_group(logGroupName=lambda_log_group_name)
@@ -204,15 +206,16 @@ def main():
     print("\n\n")
     print("**************CHECK IF S3 TRIGGER IS FULLY INITIALIZED**************")
     lambda_func_name = get_datasets_lambda() # get current lambda log deployed
+    print(lambda_func_name)
     group_name = f"/aws/lambda/{lambda_func_name}" # get log group of current lambda
-    delete_lambda_logs(group_name) # delete logs of associated lambda (currently deployed)
+    delete_lambda_logs(group_name) # delete logs of associated lambda (if it exists)
     
     logs_generated = check_if_lambda_logs_generated(group_name, bucket_name) # check if the currently deployed lambda has logs
-    print("Waiting 10 seconds before checking if logs are generated",end="")
+    print("Waiting 10 seconds before checking if lambda logs are generated...")
     while not logs_generated:
-        print(".", end="")
         time.sleep(10)
         logs_generated = check_if_lambda_logs_generated(group_name, bucket_name)
+        print("Still waiting (10s)...")
     print()
     print("***S3 trigger is fully initialized!***")
     delete_lambda_logs(group_name) # delete test logs once we know the lambda is now deployed
