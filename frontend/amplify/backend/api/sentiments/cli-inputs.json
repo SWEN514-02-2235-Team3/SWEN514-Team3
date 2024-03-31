@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "paths": {
+    "/sentiments": {
+      "name": "/sentiments",
+      "lambdaFunction": "getsentiments",
+      "permissions": {
+        "setting": "open"
+      }
+    }
+  }
+}
