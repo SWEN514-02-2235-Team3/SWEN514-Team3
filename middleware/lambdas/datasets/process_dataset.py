@@ -65,4 +65,16 @@ def handler(event, context):
         if retry_attempts > 3: continue # continue to the next row if we can't generate a uuid for some reason
         
         print(f"[{date}][{dataset_category}] {sentiment}: {comment}")   
+    
+    # delete processed object
+    s3_client.delete_object(Bucket=bucket_source, Key=dataset_filename)
+    # create empty text file saying that the file has been processed
+    filename_processed = f"{dataset_filename.rsplit("/").rsplit(".")[0]}_PROCESSED.txt"
+    with open(filename_processed, 'a') as file:
+        pass
+    s3_client.put_object(Bucket=bucket_source, Key=f"{dataset_category}/{filename_processed}", Body=open(filename_processed, 'rb'))
+    print("*************************************************")
+    print("****************PROCESSED DATASET****************")
+    print("*************************************************")
+    print(f"Replaced {dataset_filename} with {dataset_category}/{filename_processed}")
        
