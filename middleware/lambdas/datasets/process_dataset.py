@@ -17,7 +17,8 @@ def handler(event, context):
     
     if dataset_filename == "upload_datasets_test.csv":
         print("********************S3 BUCKET IS FULLY INITIALIZED********************")
-        s3_client.delete_object(Bucket=bucket_source,Key="upload_datasets_test.csv")
+        try: s3_client.delete_object(Bucket=bucket_source,Key="upload_datasets_test.csv")
+        except: pass
         return
     
     dataset_category = dataset_filename.split("/")[0] # assuming the dataset was stored in a folder (i.e. reddit, facebook, twitter)
