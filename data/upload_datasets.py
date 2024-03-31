@@ -1,3 +1,13 @@
+"""
+Run `upload_datasets.py` to upload the datasets to the s3 bucket.
+
+Requires AWS credentials through either:
+    - terraform/aws_provider.tf
+    - AWS config
+    - Manually supplied key inputs
+    
+"""
+
 import boto3
 import os
 import shutil
