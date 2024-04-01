@@ -13,6 +13,9 @@ import {
   IconButton,
   TextField,
 } from "@mui/material";
+import WordCloudComponent from "./WordCloudComponent";
+import BarChartComponent from "./BarChartComponent";
+import PieChartComponent from "./PieChartComponent";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { DatePicker } from "@mui/x-date-pickers";
@@ -37,6 +40,12 @@ const FormComponent = () => {
   const [step, setStep] = useState(1);
   const totalSteps = 3;
 
+  // state display to handle which chart to show
+  const [displayMode, setDisplayMode] = useState("form");
+
+  // data received from API
+  const [analysisData, setAnalysisData] = useState(null);
+
   const [platforms, setPlatforms] = useState({
     youtube: false,
     reddit: false,
@@ -45,6 +54,7 @@ const FormComponent = () => {
 
   const [dateRange, setDateRange] = useState({
     // Random boundaries for now
+    // TODO - Grey out dates that are not available to input
     start: dayjs("2020-10-01"), // October 1, 2020
     end: dayjs("2023-11-30"), // November 30, 2023
   });
@@ -99,6 +109,8 @@ const FormComponent = () => {
     })
       .then((response) => response.json())
       .then((data) => {
+        setAnalysisData(data);
+        setDisplayMode("");
         console.log(data);
       })
       .catch((error) => {
@@ -119,108 +131,145 @@ const FormComponent = () => {
       >
         <Container component="main" maxWidth="sm" sx={{ p: 3 }}>
           <Typography component="h1" variant="h5" color="primary" gutterBottom>
-            {/* <h1>Sentiment Analysis</h1> */}
+            Sentiment Analysis{" "}
+            {/* Removed the <h1> tag here, it's not needed */}
           </Typography>
-          {step === 1 && (
-            <FormControl component="fieldset" variant="standard" fullWidth>
-              <FormGroup>
-                <h2>Choose your platform(s)</h2>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={platforms.youtube}
-                      onChange={handlePlatformChange}
-                      name="youtube"
+          {displayMode === "form" && (
+            <>
+              {step === 1 && (
+                <FormControl component="fieldset" variant="standard" fullWidth>
+                  <FormGroup>
+                    <Typography variant="h6">
+                      Choose your platform(s)
+                    </Typography>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={platforms.youtube}
+                          onChange={handlePlatformChange}
+                          name="youtube"
+                        />
+                      }
+                      label="YouTube"
                     />
-                  }
-                  label="YouTube"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={platforms.reddit}
-                      onChange={handlePlatformChange}
-                      name="reddit"
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={platforms.reddit}
+                          onChange={handlePlatformChange}
+                          name="reddit"
+                        />
+                      }
+                      label="Reddit"
                     />
-                  }
-                  label="Reddit"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={platforms.twitter}
-                      onChange={handlePlatformChange}
-                      name="twitter"
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          checked={platforms.twitter}
+                          onChange={handlePlatformChange}
+                          name="twitter"
+                        />
+                      }
+                      label="Twitter"
                     />
-                  }
-                  label="Twitter"
-                />
-              </FormGroup>
-            </FormControl>
-          )}
+                  </FormGroup>
+                </FormControl>
+              )}
 
-          {step === 2 && (
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "space-between",
-                width: "100%",
-                mt: 2,
-              }}
-            >
-              {/* <h2>Pick a start and end date for data</h2> */}
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Start Date"
-                  value={dateRange.start}
-                  onChange={(newValue) => {
-                    handleDateChange("start", newValue);
+              {step === 2 && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    width: "100%",
+                    mt: 2,
                   }}
-                  renderInput={(params) => <TextField {...params} />}
-                />
-                <DatePicker
-                  label="End Date"
-                  value={dateRange.end}
-                  onChange={(newValue) => {
-                    handleDateChange("end", newValue);
-                  }}
-                  renderInput={(params) => <TextField {...params} />}
-                />
-              </LocalizationProvider>
+                >
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DatePicker
+                      label="Start Date"
+                      value={dateRange.start}
+                      onChange={(newValue) => {
+                        handleDateChange("start", newValue);
+                      }}
+                      renderInput={(params) => <TextField {...params} />}
+                    />
+                    <DatePicker
+                      label="End Date"
+                      value={dateRange.end}
+                      onChange={(newValue) => {
+                        handleDateChange("end", newValue);
+                      }}
+                      renderInput={(params) => <TextField {...params} />}
+                    />
+                  </LocalizationProvider>
+                </Box>
+              )}
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  width: "100%",
+                  mt: 2,
+                }}
+              >
+                {step > 1 ? (
+                  <IconButton onClick={handleBack} color="primary">
+                    <ArrowBackIcon />
+                  </IconButton>
+                ) : (
+                  // This empty div acts as a placeholder to keep the "next" button aligned to the right
+                  <div />
+                )}
+                {/* Empty div here to maintain spacing if necessary */}
+                <div style={{ flexGrow: 1 }} />
+                {step < totalSteps ? (
+                  <IconButton onClick={handleNext} color="primary">
+                    <ArrowForwardIcon />
+                  </IconButton>
+                ) : (
+                  // If you have a final action when step === totalSteps, place it here. Otherwise, keep an empty div to maintain alignment.
+                  <div />
+                )}
+              </Box>
+
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={get_sentiments}
+                fullWidth
+                sx={{ mt: 2 }}
+              >
+                Analyze
+              </Button>
+            </>
+          )}
+          {displayMode === "wordCloud" && analysisData && (
+            <WordCloudComponent data={analysisData} />
+          )}
+          {displayMode === "wordCloud" && analysisData && (
+            <WordCloudComponent data={analysisData} />
+          )}
+          {displayMode === "barChart" && analysisData && (
+            <BarChartComponent data={analysisData} />
+          )}
+          {displayMode === "pieChart" && analysisData && (
+            <PieChartComponent data={analysisData} />
+          )}
+          // Add buttons or controls here to switch between display modes, e.g.:
+          {analysisData && (
+            <Box>
+              <Button onClick={() => setDisplayMode("wordCloud")}>
+                Word Cloud
+              </Button>
+              <Button onClick={() => setDisplayMode("barChart")}>
+                Bar Chart
+              </Button>
+              <Button onClick={() => setDisplayMode("pieChart")}>
+                Pie Chart
+              </Button>
             </Box>
           )}
-          {/* TODO - Add step to get a limit */}
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              width: "100%",
-              mt: 2,
-            }}
-          >
-            {step > 1 && (
-              <IconButton onClick={handleBack} color="primary">
-                <ArrowBackIcon />
-              </IconButton>
-            )}
-            {step === 1 && <div />} {}
-            {step < totalSteps && (
-              <IconButton onClick={handleNext} color="primary">
-                <ArrowForwardIcon />
-              </IconButton>
-            )}
-            {step === totalSteps && <div />} {}
-          </Box>
-
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={get_sentiments}
-            fullWidth
-            sx={{ mt: 2 }}
-          >
-            Analyze
-          </Button>
         </Container>
       </Box>
     </ThemeProvider>
