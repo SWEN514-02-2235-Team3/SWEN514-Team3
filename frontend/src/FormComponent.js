@@ -84,9 +84,7 @@ const FormComponent = () => {
   };
 
   const get_sentiments = async () => {
-    // MUST GRAB NEW INVOKE URL EVERYTIME YOU RE-STANDUP THE INFRASTRUCTURE
-    const invokeURL = process.env.REACT_APP_API_URL;
-    console.log(invokeURL);
+    const invokeURL = process.env.REACT_APP_API_URL; // for local development this is available on the frontend/.env file from deploying terraform infra; available as environment variable for amplify
 
     // Define query string parameters
     const queryParams = new URLSearchParams({
