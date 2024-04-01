@@ -75,7 +75,7 @@ const FormComponent = () => {
 
     // Define query string parameters
     const queryParams = new URLSearchParams({
-      limit: 2,
+      limit: 5,
       source: "reddit",
     });
 
@@ -84,10 +84,10 @@ const FormComponent = () => {
 
     // Define the headers
     const headers = {
-      "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      "Access-Control-Allow-Credentials": "true",
+      // "Access-Control-Allow-Origin": "*",
+      // "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      // "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      // "Access-Control-Allow-Credentials": "true",
       date_range_from: "2020-01-01",
       date_range_to: "2024-01-01",
     };
@@ -95,7 +95,7 @@ const FormComponent = () => {
     // Use fetch to make the GET request
     fetch(urlWithParams, {
       method: "GET",
-      headers: headers,
+      // headers: headers,
     })
       .then((response) => response.json())
       .then((data) => {
