@@ -198,7 +198,7 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
     http_method   = aws_api_gateway_method.options_method.http_method
     status_code   = aws_api_gateway_method_response.options_200.status_code
     response_parameters = {
-        "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+        "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,date_range_from,date_range_to'",
         "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST,PUT'",
         "method.response.header.Access-Control-Allow-Origin" = "'*'"
     }
