@@ -1,7 +1,7 @@
 
 resource "aws_amplify_app" "sa-app" {
   name       = "Sentiment Analysis App"
-  repository = "https://github.com/jym2584/SWEN514-Team3"
+  repository = "${var.swen514_repo_fork}"
   access_token = "${var.github_token}"
   
   build_spec = <<-EOT
