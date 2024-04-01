@@ -44,9 +44,9 @@ def get_credentials_from_terraform(path=f"{SCRIPT_PATH}/../terraform/aws_provide
         global SECRET_KEY
         ACCESS_KEY = access_key
         SECRET_KEY = secret_key
-        s3_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
-        lambda_client = boto3.client('lambda', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
-        cloudwatch_client = boto3.client('logs', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
+        s3_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name="us-east-1")
+        lambda_client = boto3.client('lambda', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
+        cloudwatch_client = boto3.client('logs', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
         return True
     return False
 
@@ -74,9 +74,9 @@ def get_credentials_from_aws_config():
         global SECRET_KEY
         ACCESS_KEY = access_key
         SECRET_KEY = secret_key
-        s3_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
-        lambda_client = boto3.client('lambda', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
-        cloudwatch_client = boto3.client('logs', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
+        s3_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
+        lambda_client = boto3.client('lambda', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
+        cloudwatch_client = boto3.client('logs', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
         return True
     return False
 
