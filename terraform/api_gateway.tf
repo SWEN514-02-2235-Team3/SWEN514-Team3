@@ -44,8 +44,8 @@ resource "aws_api_gateway_method" "get_sentiments_method" {
   request_parameters = {
     "method.request.querystring.source"     = false,
     "method.request.querystring.limit"      = false,
-    "method.request.header.date_range_from" = false,
-    "method.request.header.date_range_to"   = false
+    "method.request.querystring.date_range_from" = false,
+    "method.request.querystring.date_range_to"   = false
   }
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 
@@ -75,8 +75,8 @@ resource "aws_api_gateway_integration" "lambda" {
   request_parameters = {
     "integration.request.querystring.source"        = "method.request.querystring.source" # source = method.request.querystring.source
     "integration.request.querystring.limit"         = "method.request.querystring.limit"
-    "integration.request.header.date_range_from"    = "method.request.header.date_range_from"
-    "integration.request.header.date_range_to"      = "method.request.header.date_range_to"
+    "integration.request.querystring.date_range_from"    = "method.request.querystring.date_range_from"
+    "integration.request.querystring.date_range_to"      = "method.request.querystring.date_range_to"
   }
 
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_method.get_sentiments_method, aws_api_gateway_resource.sentiments_resource ]
@@ -107,7 +107,8 @@ resource "aws_api_gateway_method_response" "get_sentiments_method_response_200" 
   }
 
   response_parameters = {
-    "method.response.header.Content-Type" = true
+    "method.response.header.Content-Type" = true,
+    "method.response.header.Access-Control-Allow-Origin" = true
   }
 
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_integration.lambda ]
@@ -157,7 +158,82 @@ resource "aws_iam_role_policy_attachment" "sa_api_gateway_lambda_policy_attachme
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 }
 
-/*
+/**********************************
     Enable CORS if needed
-*/
+*************************************/
 
+resource "aws_api_gateway_method" "options_method" {
+    rest_api_id   = "${aws_api_gateway_rest_api.sa_api_gateway.id}"
+    resource_id   = "${aws_api_gateway_resource.sentiments_resource.id}"
+    http_method   = "OPTIONS"
+    authorization = "NONE"
+}
+
+resource "aws_api_gateway_method_response" "options_200" {
+    rest_api_id   = aws_api_gateway_rest_api.sa_api_gateway.id
+    resource_id   = aws_api_gateway_resource.sentiments_resource.id
+    http_method   = aws_api_gateway_method.options_method.http_method
+    status_code   = "200"
+    response_models = {
+        "application/json" = "Empty"
+    }
+    response_parameters = {
+        "method.response.header.Access-Control-Allow-Headers" = true,
+        "method.response.header.Access-Control-Allow-Methods" = true,
+        "method.response.header.Access-Control-Allow-Origin" = true
+    }
+    depends_on = [aws_api_gateway_method.options_method]
+}
+
+
+resource "aws_api_gateway_method_response" "options_404" {
+    rest_api_id   = aws_api_gateway_rest_api.sa_api_gateway.id
+    resource_id   = aws_api_gateway_resource.sentiments_resource.id
+    http_method   = aws_api_gateway_method.options_method.http_method
+    status_code   = "404"
+    response_models = {
+        "application/json" = "Empty"
+    }
+    response_parameters = {
+        "method.response.header.Access-Control-Allow-Headers" = true,
+        "method.response.header.Access-Control-Allow-Methods" = true,
+        "method.response.header.Access-Control-Allow-Origin" = true
+    }
+    depends_on = [aws_api_gateway_method.options_method]
+}
+
+resource "aws_api_gateway_integration" "options_integration" {
+    rest_api_id   = aws_api_gateway_rest_api.sa_api_gateway.id
+    resource_id   = aws_api_gateway_resource.sentiments_resource.id
+    http_method   = aws_api_gateway_method.options_method.http_method
+    type          = "MOCK"
+    depends_on = [aws_api_gateway_method.options_method]
+}
+
+resource "aws_api_gateway_integration_response" "options_integration_response" {
+    rest_api_id   = aws_api_gateway_rest_api.sa_api_gateway.id
+    resource_id   = aws_api_gateway_resource.sentiments_resource.id
+    http_method   = aws_api_gateway_method.options_method.http_method
+    status_code   = aws_api_gateway_method_response.options_200.status_code
+    response_parameters = {
+        "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+        "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST,GET'",
+        "method.response.header.Access-Control-Allow-Origin" = "'*'"
+    }
+    depends_on = [aws_api_gateway_method_response.options_200]
+}
+
+# Generate .env to store API Gateway URL
+resource "null_resource" "generate_env_file" {
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOF
+      echo REACT_APP_API_URL=${aws_api_gateway_deployment.sa_api_gateway_deployment.invoke_url}  > ../frontend/.env
+    EOF
+  }
+
+  depends_on = [ aws_api_gateway_deployment.sa_api_gateway_deployment ]
+}

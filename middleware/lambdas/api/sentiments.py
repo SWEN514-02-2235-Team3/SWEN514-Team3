@@ -10,9 +10,7 @@ def lambda_handler(event, context):
     """
 
     # get the parameters
-    parameters_query = event.get("queryStringParameters", {})
-    parameters_header = event.get("headers", {})
-    
+    parameters_query = event.get("queryStringParameters", {})    
     limit = None
     platform = None
     date_range_from = None
@@ -25,12 +23,15 @@ def lambda_handler(event, context):
         platform = parameters_query.get("platform").strip()
     except: pass
     try:
-        date_range_from = parameters_header.get("date_range_from").strip()
+        date_range_from = parameters_query.get("date_range_from").strip()
     except: pass
     try:
-        date_range_to = parameters_header.get("date_range_to").strip()
+        date_range_to = parameters_query.get("date_range_to").strip()
     except: pass
-
+    print(f"limit (query): {limit}")
+    print(f"platform (query): {platform}")
+    print(f"date_range_from (query): {date_range_from}")
+    print(f"date_range_to (query): {date_range_to}")
     
     # dynamodb query parameters
     query_params = {
@@ -73,14 +74,17 @@ def lambda_handler(event, context):
     
     # retrieve dynamodb response from scan       
     response = table.scan(**query_params)['Items']
-    print(response)
     if response:
         response = sorted(response, key=lambda x: x.get('comment_date'), reverse=True)
         if limit:
             response = response[:limit]
-    print(response)
         
     return {
         'statusCode': 200,
+        'headers': {
+            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+            "Access-Control-Allow-Origin": "*",# Required for CORS support to work
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
+        },
         'body': json.dumps(response)
     }

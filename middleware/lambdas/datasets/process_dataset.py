@@ -4,6 +4,7 @@ import io
 from dateutil.parser import parse
 import uuid
 import botocore.exceptions
+import time
 
 # Boto Setup
 s3_client = boto3.client("s3")
@@ -29,6 +30,8 @@ def handler(event, context):
     print(to_print)
     print("-" * len(to_print))
    
+    reader = None
+
    # Parse through file
     file = s3_client.get_object(Bucket=bucket_source, Key=dataset_filename) # get file from s3 bucket
     content = file['Body'].read().decode('utf-8-sig') # read contents

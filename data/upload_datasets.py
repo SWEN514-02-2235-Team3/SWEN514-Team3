@@ -55,7 +55,9 @@ def get_credentials_from_aws_config():
     """
     plat = platform.system()
     credentials_path = None
-    if plat == "Windows": credentials_path = f"C:/Users/{os.getenv('USERPROFILE').split('\\')[-1]}/.aws/credentials"
+    if plat == "Windows": 
+        pass
+        # credentials_path = f"C:/Users/{os.getenv('USERPROFILE').split('\\')[-1]}/.aws/credentials"
     else: credentials_path = "~/.aws/credentials"
     with open(credentials_path, 'r') as file:
         for line in file:
@@ -162,6 +164,7 @@ def check_if_lambda_logs_generated(lambda_log_group_name, bucket_name):
     return False
 
 def main():
+    print("\nRunning Datasets script....")
     credentials_found = False
     while not credentials_found:
         if get_credentials_from_terraform():
@@ -218,7 +221,7 @@ def main():
             bar()
             
     logs_generated = check_if_lambda_logs_generated(group_name, bucket_name) # check if the currently deployed lambda has logs
-    with alive_progress.alive_bar(title="Still waiting...", monitor=False, stats=False, spinner=None) as bar:
+    with alive_progress.alive_bar(title="Polling until the s3 trigger is initalized...", monitor=False, stats=False, spinner=None) as bar:
         i = 0
         while not logs_generated:
             time.sleep(0.1)
