@@ -11,7 +11,7 @@ resource "aws_amplify_app" "sa-app" {
         preBuild:
           commands:
             - cd frontend/   # Navigate to the frontend directory from the root repository
-            - npm install -- force
+            - npm install --force
         build:
           commands:
             - npm run build
