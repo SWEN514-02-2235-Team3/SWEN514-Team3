@@ -31,19 +31,25 @@ resource "aws_amplify_app" "sa-app" {
   environment_variables = {
     ENV = "dev"
   }
-
-
-
   depends_on = [ aws_lambda_permission.lambda_s3_trigger_source, aws_lambda_function.lambda_s3_datasets, aws_dynamodb_table.db_sa_data, aws_s3_bucket.s3_bucket_sentianalysis ]
 }
 
-data "external" "current_git_branch" {
-  program = ["bash", "-c", "git rev-parse --abbrev-ref HEAD"]
-  depends_on = [ aws_amplify_app.sa-app ]
+terraform {
+  required_providers {
+    git = {
+      source = "paultyng/git"
+      version = "0.1.0"
+    }
+  }
+}
+
+
+data "git_repository" "repo" {
+  path = "../" # root repository
 }
 
 resource "aws_amplify_branch" "amplify_branch" {
   app_id      = aws_amplify_app.sa-app.id
-  branch_name = "${data.external.current_git_branch.result}" # git branch
+  branch_name = data.git_repository.repo.branch # current git branch
   depends_on = [ aws_amplify_app.sa-app ]
 }
