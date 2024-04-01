@@ -5,6 +5,7 @@ S3 Bucket configuration to upload datasets from the github repository
 */
 resource "aws_s3_bucket" "s3_bucket_sentianalysis" {
   bucket = "swen514-sa-datasets-${lower(random_string.bucket_suffix.result)}" # need random string because s3 buckets always has to be unique for all aws uesrs
+  force_destroy = true
 }
 
 /*
@@ -18,33 +19,34 @@ resource "aws_s3_object" "folder_structure" {
   for_each     = { for dir in local.data_dirs : dir => { folder = dir } }
 }
 
-/*
-    Wait 30 seconds before uploading datasets to allow 
-    time for AWS to fully create the necessary resources
-    (i.e. lambdas)
-*/
-resource "time_sleep" "wait_before_uploading" {
-  create_duration = "10s"
+# /*
+#     Wait 30 seconds before uploading datasets to allow 
+#     time for AWS to fully create the necessary resources
+#     (i.e. lambdas)
+# */
+# resource "time_sleep" "wait_before_uploading" {
+#   create_duration = "30s"
 
-  depends_on = [
-    aws_s3_bucket_notification.lambda_s3_datasets_trigger,
-    aws_dynamodb_table.db_sa_data,
-    aws_s3_bucket.s3_bucket_sentianalysis,
-    aws_s3_object.folder_structure
-  ]
-}
+#   depends_on = [
+#     aws_s3_bucket_notification.lambda_s3_datasets_trigger,
+#     aws_dynamodb_table.db_sa_data,
+#     aws_s3_bucket.s3_bucket_sentianalysis,
+#     aws_s3_object.folder_structure,
+#     aws_lambda_function.lambda_s3_datasets
+#   ]
+# }
 
 
-/*
-Upload data sets to the s3 bucket
-*/
-resource "aws_s3_object" "upload_dataset" {
-  depends_on = [time_sleep.wait_before_uploading]
+# /*
+#   Upload data sets to the s3 bucket
+# */
+# resource "aws_s3_object" "upload_dataset" {
+#   depends_on = [time_sleep.wait_before_uploading]
 
-  for_each = { for file in local.csv_files : file.key => file }
+#   for_each = { for file in local.csv_files : file.key => file }
 
-  bucket = aws_s3_bucket.s3_bucket_sentianalysis.id
-  key    = each.value.key
-  source = each.value.path
-  etag   = filemd5(each.value.path)
-}
+#   bucket = aws_s3_bucket.s3_bucket_sentianalysis.id
+#   key    = each.value.key
+#   source = each.value.path
+#   etag   = filemd5(each.value.path)
+# }

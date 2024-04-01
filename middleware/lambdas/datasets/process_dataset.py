@@ -15,6 +15,13 @@ dynamodb_client = boto3.client("dynamodb")
 def handler(event, context):
     bucket_source = event['Records'][0]['s3']['bucket']['name'] # Bucket Name where file was uploaded
     dataset_filename = event['Records'][0]['s3']['object']['key'] # Filename of object (with path)
+    
+    if dataset_filename == "upload_datasets_test.csv":
+        print("********************S3 BUCKET IS FULLY INITIALIZED********************")
+        try: s3_client.delete_object(Bucket=bucket_source,Key="upload_datasets_test.csv")
+        except: pass
+        return
+    
     dataset_category = dataset_filename.split("/")[0] # assuming the dataset was stored in a folder (i.e. reddit, facebook, twitter)
     
     # Debug print
@@ -26,17 +33,11 @@ def handler(event, context):
     reader = None
 
    # Parse through file
-    for i in range(3):  
-        time.sleep(1)
-        try:    
-            file = s3_client.get_object(Bucket=bucket_source, Key=dataset_filename) # get file from s3 bucket
-            content = file['Body'].read().decode('utf-8') # read contents
-            reader = csv.reader(io.StringIO(content)) # pass into csv reader
-            next(reader) # skip header
-            break
-        except KeyError as e:
-            print(e)
-            
+    file = s3_client.get_object(Bucket=bucket_source, Key=dataset_filename) # get file from s3 bucket
+    content = file['Body'].read().decode('utf-8-sig') # read contents
+    reader = csv.reader(io.StringIO(content)) # pass into csv reader
+    next(reader) # skip header
+    
     # iterate through the dataset (assuming the dataset has been edited to include these columns in order: date, comment)
     for row in reader:
         date = row[0]
@@ -51,11 +52,10 @@ def handler(event, context):
         
         sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment'] # positive, negative, or neutral        
         
-        retry_attempts = 0
+
         # Generate a non-blocking UUID and insert record to dynamodb
-        while True:
+        for _ in range(3):
             try:
-                if retry_attempts > 3: break # stop trying to process a uuid
                 dynamodb_client.put_item(
                     TableName="SentAnalysisDataResults",
                     Item={
@@ -66,12 +66,12 @@ def handler(event, context):
                         'platform': {'S': dataset_category},
                     }
                 )
-                break
-            except botocore.exceptions.ClientError:
-                retry_attempts+=1
-                continue # try again until there is no collisions
-        
-        if retry_attempts > 3: continue # continue to the next row if we can't generate a uuid for some reason
-        
-        print(f"[{date}][{dataset_category}] {sentiment}: {comment}")   
+                print(f"INFO: [{date}][{dataset_category}] {sentiment}: {comment}")   
+                break # break the loop 
+            except botocore.exceptions.ClientError: # dont process dataset
+                print(f"WARNING: Couldn't upload {row} to dynamodb...")
+    
+    print("*************************************************")
+    print("****************PROCESSED DATASET****************")
+    print("*************************************************")
        

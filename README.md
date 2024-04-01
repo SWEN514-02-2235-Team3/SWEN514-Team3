@@ -50,7 +50,8 @@ You can run `setup_dependencies.bat` or `setup_dependencies.sh` to setup the loc
 
 ```
 cd terraform/
-terraform apply
+terraform apply                    # standup aws infrastructure
+python ../data/upload_datasets.py  # this is used to upload the datasets after deploying the terraform infrastructure
 ```
 
 Terraform apply stands up the AWS infrastructure & code needed to run the application.

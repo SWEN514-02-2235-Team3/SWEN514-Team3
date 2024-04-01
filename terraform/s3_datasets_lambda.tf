@@ -32,11 +32,12 @@ resource "aws_iam_role" "lambda_s3_datasets_role" {
 
 # S3 Lambda function for datasets
 resource "aws_lambda_function" "lambda_s3_datasets" {
-  function_name = "swen514-sa-datasets"
+  function_name = "swen514-datasets-lambda_${formatdate("YYYY-MM-DD-hh-mm-ss", timestamp())}"
   role          = aws_iam_role.lambda_s3_datasets_role.arn
   runtime       = "python3.9"
   handler       = "process_dataset.handler"
   filename      = data.archive_file.lambda_s3_datasets_code.output_path
+  timeout       = 600 # 10 minute timeout
 
   depends_on = [aws_iam_role_policy_attachment.lambda_s3_datasets_policy_attach]
 }
@@ -112,11 +113,11 @@ resource "aws_iam_role_policy" "lambda_s3_datasets_policy_comprehend" {
 
 # Add permission
 resource "aws_lambda_permission" "lambda_s3_trigger_source" {
-  statement_id  = "AllowS3Invoke"
+  statement_id  = "AllowExecutionFromS3Bucket"
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.lambda_s3_datasets.function_name
+  function_name = aws_lambda_function.lambda_s3_datasets.arn
   principal     = "s3.amazonaws.com"
-  source_arn    = "arn:aws:s3:::${aws_s3_bucket.s3_bucket_sentianalysis.id}"
+  source_arn    = aws_s3_bucket.s3_bucket_sentianalysis.arn
 
   depends_on = [aws_s3_bucket.s3_bucket_sentianalysis, aws_dynamodb_table.db_sa_data]
 }

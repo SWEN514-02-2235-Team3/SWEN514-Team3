@@ -31,6 +31,7 @@ resource "aws_api_gateway_resource" "sentiments_resource" {
   rest_api_id = aws_api_gateway_rest_api.sa_api_gateway.id
   parent_id   = aws_api_gateway_rest_api.sa_api_gateway.root_resource_id
   path_part   = "sentiments"
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 }
 
 // GET sentiments/ (method request)
@@ -46,16 +47,18 @@ resource "aws_api_gateway_method" "get_sentiments_method" {
     "method.request.header.date_range_from" = false,
     "method.request.header.date_range_to"   = false
   }
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 
 }
 
 
 // API gateway deployment stage
 resource "aws_api_gateway_deployment" "sa_api_gateway_deployment" {
-  depends_on    = [aws_api_gateway_integration.lambda]
+  depends_on    = [aws_api_gateway_integration.lambda, aws_api_gateway_rest_api.sa_api_gateway]
   rest_api_id   = aws_api_gateway_rest_api.sa_api_gateway.id
   stage_name    = "dev"
   description   = "Development Stage"
+  
 }
 
 // sentiments GET - Invoke Lambda function (integration request)
@@ -75,6 +78,8 @@ resource "aws_api_gateway_integration" "lambda" {
     "integration.request.header.date_range_from"    = "method.request.header.date_range_from"
     "integration.request.header.date_range_to"      = "method.request.header.date_range_to"
   }
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_method.get_sentiments_method, aws_api_gateway_resource.sentiments_resource ]
 }
 
 // sentiments GET - Integration response
@@ -86,6 +91,8 @@ resource "aws_api_gateway_integration_response" "lambda_response_200" {
   response_templates = {
     "application/json" = ""
   }
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_integration.lambda ]
 }
 
 // sentiments GET - Method response
@@ -102,6 +109,8 @@ resource "aws_api_gateway_method_response" "get_sentiments_method_response_200" 
   response_parameters = {
     "method.response.header.Content-Type" = true
   }
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_integration.lambda ]
 }
 
 /*
@@ -121,6 +130,8 @@ resource "aws_iam_role" "sa_api_gateway_role" {
       "Action": "sts:AssumeRole"
     }]
   })
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 }
 
 // IAM Policy - Invoke Lambda
@@ -134,12 +145,16 @@ resource "aws_iam_policy" "sa_api_gateway_lambda_policy" {
       "Resource": aws_lambda_function.get_sentiments.arn
     }]
   })
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 }
 
 // Attach Policy to API Gateway
 resource "aws_iam_role_policy_attachment" "sa_api_gateway_lambda_policy_attachment" {
   policy_arn = aws_iam_policy.sa_api_gateway_lambda_policy.arn
   role       = aws_iam_role.sa_api_gateway_role.name
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 }
 
 /*
