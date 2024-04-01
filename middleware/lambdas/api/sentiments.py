@@ -10,9 +10,7 @@ def lambda_handler(event, context):
     """
 
     # get the parameters
-    parameters_query = event.get("queryStringParameters", {})
-    parameters_header = event.get("headers", {})
-    
+    parameters_query = event.get("queryStringParameters", {})    
     limit = None
     platform = None
     date_range_from = None
@@ -25,12 +23,15 @@ def lambda_handler(event, context):
         platform = parameters_query.get("platform").strip()
     except: pass
     try:
-        date_range_from = parameters_header.get("date_range_from").strip()
+        date_range_from = parameters_query.get("date_range_from").strip()
     except: pass
     try:
-        date_range_to = parameters_header.get("date_range_to").strip()
+        date_range_to = parameters_query.get("date_range_to").strip()
     except: pass
-
+    print("limit (query): " + limit)
+    print("platform (query): " + platform)
+    print("date_range_from (query): " + date_range_from)
+    print("date_range_to (query): " + date_range_to)
     
     # dynamodb query parameters
     query_params = {
@@ -73,12 +74,10 @@ def lambda_handler(event, context):
     
     # retrieve dynamodb response from scan       
     response = table.scan(**query_params)['Items']
-    print(response)
     if response:
         response = sorted(response, key=lambda x: x.get('comment_date'), reverse=True)
         if limit:
             response = response[:limit]
-    print(response)
         
     return {
         'statusCode': 200,

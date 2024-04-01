@@ -44,8 +44,8 @@ resource "aws_api_gateway_method" "get_sentiments_method" {
   request_parameters = {
     "method.request.querystring.source"     = false,
     "method.request.querystring.limit"      = false,
-    "method.request.header.date_range_from" = false,
-    "method.request.header.date_range_to"   = false
+    "method.request.querystring.date_range_from" = false,
+    "method.request.querystring.date_range_to"   = false
   }
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 
@@ -75,8 +75,8 @@ resource "aws_api_gateway_integration" "lambda" {
   request_parameters = {
     "integration.request.querystring.source"        = "method.request.querystring.source" # source = method.request.querystring.source
     "integration.request.querystring.limit"         = "method.request.querystring.limit"
-    "integration.request.header.date_range_from"    = "method.request.header.date_range_from"
-    "integration.request.header.date_range_to"      = "method.request.header.date_range_to"
+    "integration.request.querystring.date_range_from"    = "method.request.querystring.date_range_from"
+    "integration.request.querystring.date_range_to"      = "method.request.querystring.date_range_to"
   }
 
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_method.get_sentiments_method, aws_api_gateway_resource.sentiments_resource ]
@@ -179,9 +179,7 @@ resource "aws_api_gateway_method_response" "options_200" {
     response_parameters = {
         "method.response.header.Access-Control-Allow-Headers" = true,
         "method.response.header.Access-Control-Allow-Methods" = true,
-        "method.response.header.Access-Control-Allow-Origin" = true,
-        "method.response.header.date_range_from" = true,
-        "method.response.header.date_range_to" = true,
+        "method.response.header.Access-Control-Allow-Origin" = true
     }
     depends_on = [aws_api_gateway_method.options_method]
 }
@@ -198,9 +196,7 @@ resource "aws_api_gateway_method_response" "options_404" {
     response_parameters = {
         "method.response.header.Access-Control-Allow-Headers" = true,
         "method.response.header.Access-Control-Allow-Methods" = true,
-        "method.response.header.Access-Control-Allow-Origin" = true,
-        "method.response.header.date_range_from" = true,
-        "method.response.header.date_range_to" = true,
+        "method.response.header.Access-Control-Allow-Origin" = true
     }
     depends_on = [aws_api_gateway_method.options_method]
 }
@@ -219,7 +215,7 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
     http_method   = aws_api_gateway_method.options_method.http_method
     status_code   = aws_api_gateway_method_response.options_200.status_code
     response_parameters = {
-        "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,date_range_from,date_range_to'",
+        "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
         "method.response.header.Access-Control-Allow-Methods" = "'GET,OPTIONS,POST,PUT'",
         "method.response.header.Access-Control-Allow-Origin" = "'*'"
     }
