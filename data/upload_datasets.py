@@ -164,6 +164,7 @@ def check_if_lambda_logs_generated(lambda_log_group_name, bucket_name):
     return False
 
 def main():
+    print("\nRunning Datasets script....")
     credentials_found = False
     while not credentials_found:
         if get_credentials_from_terraform():

@@ -28,10 +28,10 @@ def lambda_handler(event, context):
     try:
         date_range_to = parameters_query.get("date_range_to").strip()
     except: pass
-    print("limit (query): " + limit)
-    print("platform (query): " + platform)
-    print("date_range_from (query): " + date_range_from)
-    print("date_range_to (query): " + date_range_to)
+    print(f"limit (query): {limit}")
+    print(f"platform (query): {platform}")
+    print(f"date_range_from (query): {date_range_from}")
+    print(f"date_range_to (query): {date_range_to}")
     
     # dynamodb query parameters
     query_params = {
@@ -82,9 +82,9 @@ def lambda_handler(event, context):
     return {
         'statusCode': 200,
         'headers': {
-            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
             "Access-Control-Allow-Origin": "*",# Required for CORS support to work
-            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET'
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
         },
         'body': json.dumps(response)
     }

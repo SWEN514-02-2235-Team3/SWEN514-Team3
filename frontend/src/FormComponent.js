@@ -93,20 +93,14 @@ const FormComponent = () => {
     });
 
     // Construct the full URL with query string parameters
-    const urlWithParams = `${invokeURL}?${queryParams.toString()}`;
+    const urlWithParams = `${invokeURL}/sentiments?${queryParams.toString()}`;
 
     // Define the headers
     // Headers do not work atm
-    const headers = {
-       "Access-Control-Allow-Origin": "*",
-       "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-       "Access-Control-Allow-Headers": "Content-Type, Authorization"
-    };
 
     // Use fetch to make the GET request
     fetch(urlWithParams, {
       method: "GET",
-      headers: headers,
     })
       .then((response) => response.json())
       .then((data) => {
