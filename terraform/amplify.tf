@@ -1,7 +1,7 @@
 
 resource "aws_amplify_app" "sa-app" {
   name       = "Sentiment Analysis App"
-  repository = "https://github.com/gregSWEN/SWEN514-Team3"
+  repository = "https://github.com/jym2584/SWEN514-Team3"
   access_token = "${var.github_token}"
   
   build_spec = <<-EOT
@@ -11,7 +11,7 @@ resource "aws_amplify_app" "sa-app" {
         preBuild:
           commands:
             - cd frontend/   # Navigate to the frontend directory from the root repository
-            - npm install
+            - npm install -- force
         build:
           commands:
             - npm run build
@@ -30,7 +30,7 @@ resource "aws_amplify_app" "sa-app" {
   }
   environment_variables = {
     ENV = "dev"
-    API_URL = "${aws_api_gateway_deployment.sa_api_gateway_deployment.invoke_url}" # API Gateway URL
+    REACT_APP_API_URL = "${aws_api_gateway_deployment.sa_api_gateway_deployment.invoke_url}" # API Gateway URL
   }
   depends_on = [ aws_lambda_permission.lambda_s3_trigger_source, aws_lambda_function.lambda_s3_datasets, aws_dynamodb_table.db_sa_data, aws_s3_bucket.s3_bucket_sentianalysis ]
 }

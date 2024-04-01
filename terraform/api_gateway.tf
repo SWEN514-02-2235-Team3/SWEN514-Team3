@@ -225,3 +225,18 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
     }
     depends_on = [aws_api_gateway_method_response.options_200]
 }
+
+# Generate .env values and write to file
+resource "null_resource" "generate_env_file" {
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+
+  provisioner "local-exec" {
+    command = <<-EOF
+      echo REACT_APP_API_URL=${aws_api_gateway_deployment.sa_api_gateway_deployment.invoke_url}  > ../frontend/.env
+    EOF
+  }
+
+  depends_on = [ aws_api_gateway_deployment.sa_api_gateway_deployment ]
+}

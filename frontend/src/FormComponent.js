@@ -85,8 +85,8 @@ const FormComponent = () => {
 
   const get_sentiments = async () => {
     // MUST GRAB NEW INVOKE URL EVERYTIME YOU RE-STANDUP THE INFRASTRUCTURE
-    const invokeURL =
-      "https://mwryxefl17.execute-api.us-east-1.amazonaws.com/dev/sentiments";
+    const invokeURL = process.env.REACT_APP_API_URL;
+    console.log(invokeURL);
 
     // Define query string parameters
     const queryParams = new URLSearchParams({
@@ -111,7 +111,7 @@ const FormComponent = () => {
     // Use fetch to make the GET request
     fetch(urlWithParams, {
       method: "GET",
-      // headers: headers,
+      headers: headers,
     })
       .then((response) => response.json())
       .then((data) => {
