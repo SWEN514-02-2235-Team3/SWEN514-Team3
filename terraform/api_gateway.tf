@@ -226,7 +226,7 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
     depends_on = [aws_api_gateway_method_response.options_200]
 }
 
-# Generate .env values and write to file
+# Generate .env to store API Gateway URL
 resource "null_resource" "generate_env_file" {
   triggers = {
     always_run = "${timestamp()}"
