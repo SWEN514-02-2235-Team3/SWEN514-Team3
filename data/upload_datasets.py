@@ -205,20 +205,20 @@ def main():
     bucket_name = s3_get_bucket_name()
     s3_delete_files(bucket_name)
     
-    print("\n\n")
+    print("\n")
     print("**************CHECK IF S3 TRIGGER IS FULLY INITIALIZED**************")
     lambda_func_name = get_datasets_lambda() # get current lambda log deployed
     print(lambda_func_name)
     group_name = f"/aws/lambda/{lambda_func_name}" # get log group of current lambda
     delete_lambda_logs(group_name) # delete logs of associated lambda (if it exists)
     
-    with alive_progress.alive_bar(60, title="Waiting 60s before checking if the s3 trigger is initialized", stats=False, spinner=None) as bar:
+    with alive_progress.alive_bar(60, title="Waiting 60s until the s3 trigger is initialized...", stats=False, spinner=None) as bar:
         for _ in range(0, 60):
             time.sleep(1)
             bar()
             
     logs_generated = check_if_lambda_logs_generated(group_name, bucket_name) # check if the currently deployed lambda has logs
-    with alive_progress.alive_bar(title="Checking if the s3 trigger is initialized", monitor=False, stats=False, spinner=None) as bar:
+    with alive_progress.alive_bar(title="Still waiting...", monitor=False, stats=False, spinner=None) as bar:
         i = 0
         while not logs_generated:
             time.sleep(0.1)
@@ -228,9 +228,9 @@ def main():
                 logs_generated = check_if_lambda_logs_generated(group_name, bucket_name)
                 i = 0
     print()
-    print("***S3 trigger is fully initialized!***")
+    print("*****************S3 trigger is fully initialized!*****************")
     delete_lambda_logs(group_name) # delete test logs once we know the lambda is now deployed
-    print("\n\n")
+    print("\n")
     s3_upload_files(bucket_name, datasets_input)
     
 if __name__ == "__main__":
