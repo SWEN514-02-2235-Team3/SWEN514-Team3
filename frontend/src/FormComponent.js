@@ -98,12 +98,9 @@ const FormComponent = () => {
     // Define the headers
     // Headers do not work atm
     const headers = {
-      // "Access-Control-Allow-Origin": "*",
-      // "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      // "Access-Control-Allow-Headers": "Content-Type, Authorization",
-      // "Access-Control-Allow-Credentials": "true",
-      date_range_from: "2020-01-01",
-      date_range_to: "2024-01-01",
+       "Access-Control-Allow-Origin": "*",
+       "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+       "Access-Control-Allow-Headers": "Content-Type, Authorization"
     };
 
     // Use fetch to make the GET request
