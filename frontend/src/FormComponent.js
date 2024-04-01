@@ -108,7 +108,7 @@ const FormComponent = () => {
           {step === 1 && (
             <FormControl component="fieldset" variant="standard" fullWidth>
               <FormGroup>
-                <h2>Choose your platform(s)</h2>
+                <h2>Choose your platform(s) DUHHH THOUGH</h2>
                 <FormControlLabel
                   control={
                     <Checkbox
