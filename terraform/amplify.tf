@@ -30,6 +30,7 @@ resource "aws_amplify_app" "sa-app" {
   }
   environment_variables = {
     ENV = "dev"
+    #API_URL = "${aws_api_gateway_deployment.example_deployment.invoke_url}" # TODO: api gateway invoke url
   }
   depends_on = [ aws_lambda_permission.lambda_s3_trigger_source, aws_lambda_function.lambda_s3_datasets, aws_dynamodb_table.db_sa_data, aws_s3_bucket.s3_bucket_sentianalysis ]
 }
