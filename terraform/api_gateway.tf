@@ -92,6 +92,10 @@ resource "aws_api_gateway_integration_response" "lambda_response_200" {
     "application/json" = ""
   }
 
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"
+  }
+
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_integration.lambda ]
 }
 
@@ -107,7 +111,8 @@ resource "aws_api_gateway_method_response" "get_sentiments_method_response_200" 
   }
 
   response_parameters = {
-    "method.response.header.Content-Type" = true
+    "method.response.header.Content-Type"                = true,
+    "method.response.header.Access-Control-Allow-Origin" = true
   }
 
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_integration.lambda ]
@@ -161,3 +166,63 @@ resource "aws_iam_role_policy_attachment" "sa_api_gateway_lambda_policy_attachme
     Enable CORS if needed
 */
 
+// sentiments OPTIONS - Method request
+resource "aws_api_gateway_method" "options_sentiments_method" {
+  rest_api_id   = aws_api_gateway_rest_api.sa_api_gateway.id
+  resource_id   = aws_api_gateway_resource.sentiments_resource.id
+  http_method   = "OPTIONS"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.header.Origin" = true
+  }
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
+}
+
+// sentiments OPTIONS - Integration response
+resource "aws_api_gateway_integration_response" "options_integration_response" {
+  rest_api_id = aws_api_gateway_rest_api.sa_api_gateway.id
+  resource_id = aws_api_gateway_resource.sentiments_resource.id
+  http_method = aws_api_gateway_method.options_sentiments_method.http_method
+  status_code = "200"
+  
+  response_templates = {
+    "application/json" = ""
+  }
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
+}
+
+// sentiments OPTIONS - Method response
+resource "aws_api_gateway_method_response" "options_method_response" {
+  rest_api_id = aws_api_gateway_rest_api.sa_api_gateway.id
+  resource_id = aws_api_gateway_resource.sentiments_resource.id
+  http_method = aws_api_gateway_method.options_sentiments_method.http_method
+  status_code = "200"
+
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Headers" = true,
+    "method.response.header.Access-Control-Allow-Methods" = true,
+    "method.response.header.Access-Control-Allow-Origin"  = true
+  }
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
+}
+
+// sentiments GET - Integration response
+resource "aws_api_gateway_integration_response" "lambda_response_200" {
+  rest_api_id          = aws_api_gateway_rest_api.sa_api_gateway.id
+  resource_id          = aws_api_gateway_resource.sentiments_resource.id
+  http_method          = aws_api_gateway_method.get_sentiments_method.http_method
+  status_code          = "200"
+  response_templates = {
+    "application/json" = ""
+  }
+  
+  response_parameters = {
+    "method.response.header.Access-Control-Allow-Origin" = "'*'"
+  }
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_integration.lambda ]
+}
