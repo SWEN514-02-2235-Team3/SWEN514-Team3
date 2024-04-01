@@ -71,7 +71,7 @@ const FormComponent = () => {
 
   const get_sentiments = async () => {
     const invokeURL =
-      "https://ylpzz0puo5.execute-api.us-east-1.amazonaws.com/dev/sentiments";
+      "https://mwryxefl17.execute-api.us-east-1.amazonaws.com/dev/sentiments";
 
     // Define query string parameters
     const queryParams = new URLSearchParams({
@@ -85,7 +85,9 @@ const FormComponent = () => {
     // Define the headers
     const headers = {
       "Access-Control-Allow-Origin": "*",
-      "Access-Control-Allow-Headers": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, Authorization",
+      "Access-Control-Allow-Credentials": "true",
       date_range_from: "2020-01-01",
       date_range_to: "2024-01-01",
     };
@@ -117,7 +119,7 @@ const FormComponent = () => {
       >
         <Container component="main" maxWidth="sm" sx={{ p: 3 }}>
           <Typography component="h1" variant="h5" color="primary" gutterBottom>
-            <h1>Sentiment Analysis</h1>
+            {/* <h1>Sentiment Analysis</h1> */}
           </Typography>
           {step === 1 && (
             <FormControl component="fieldset" variant="standard" fullWidth>
