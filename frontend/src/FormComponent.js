@@ -69,26 +69,40 @@ const FormComponent = () => {
     setDateRange({ ...dateRange, [name]: value });
   };
 
-  // const get_sentiments = async () => {
-  //   try {
-  //     const restOperation = get({
-  //       apiName: "TODO-get apiname",
-  //       path: "/sentiments",
-  //       options: {
-  //         headers: {
-  //           date_range_from: "2020-01-01",
-  //           date_range_to: "2024-01-01",
-  //         },
-  //         queryStringParameters: {
-  //           limit: 5,
-  //           source: "reddit",
-  //         },
-  //       },
-  //     });
-  //   } catch (e) {
-  //     console.log("GET call failed: ", JSON.parse(e.response.body));
-  //   }
-  // };
+  const get_sentiments = async () => {
+    const invokeURL =
+      "https://ylpzz0puo5.execute-api.us-east-1.amazonaws.com/dev/sentiments";
+
+    // Define query string parameters
+    const queryParams = new URLSearchParams({
+      limit: 2,
+      source: "reddit",
+    });
+
+    // Construct the full URL with query string parameters
+    const urlWithParams = `${invokeURL}?${queryParams.toString()}`;
+
+    // Define the headers
+    const headers = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Headers": "*",
+      date_range_from: "2020-01-01",
+      date_range_to: "2024-01-01",
+    };
+
+    // Use fetch to make the GET request
+    fetch(urlWithParams, {
+      method: "GET",
+      headers: headers,
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error("Error fetching data:", error);
+      });
+  };
 
   return (
     <ThemeProvider theme={theme}>
@@ -108,7 +122,7 @@ const FormComponent = () => {
           {step === 1 && (
             <FormControl component="fieldset" variant="standard" fullWidth>
               <FormGroup>
-                <h2>Choose your platform(s) DUHHH THOUGH</h2>
+                <h2>Choose your platform(s)</h2>
                 <FormControlLabel
                   control={
                     <Checkbox
@@ -199,9 +213,7 @@ const FormComponent = () => {
           <Button
             variant="contained"
             color="primary"
-            onClick={() => {
-              alert("Hello World");
-            }}
+            onClick={get_sentiments}
             fullWidth
             sx={{ mt: 2 }}
           >
@@ -212,5 +224,4 @@ const FormComponent = () => {
     </ThemeProvider>
   );
 };
-
 export default FormComponent;
