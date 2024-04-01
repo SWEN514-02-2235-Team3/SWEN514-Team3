@@ -15,7 +15,10 @@ import {
   FormControlLabel,
   FormControl,
   FormLabel,
+  CircularProgress,
 } from "@mui/material";
+
+import { LoadingButton } from '@mui/lab';
 
 import WordCloudComponent from "./WordCloudComponent";
 import BarChartComponent from "./BarChartComponent";
@@ -58,6 +61,9 @@ const FormComponent = () => {
     end: dayjs("2023-11-30"), // November 30, 2023
   });
 
+  const [loading, setLoading] = useState(0);
+
+
   const handlePlatformChange = (event) => {
     setPlatforms(event.target.value);
   };
@@ -85,7 +91,7 @@ const FormComponent = () => {
 
   const get_sentiments = async () => {
     const invokeURL = process.env.REACT_APP_API_URL; // for local development this is available on the frontend/.env file from deploying terraform infra; available as environment variable for amplify
-
+    setLoading(1);
     // Define query string parameters
     const queryParams = new URLSearchParams({
       limit: limit,
@@ -102,15 +108,22 @@ const FormComponent = () => {
     fetch(urlWithParams, {
       method: "GET",
     })
-      .then((response) => response.json())
-      .then((data) => {
+      .then(response => response.json())
+
+      .then(data => {
         setAnalysisData(data);
         setDisplayMode("wordCloud");
         console.log(data);
       })
-      .catch((error) => {
+
+      .catch(error => {
         console.error("Error fetching data:", error);
+      })
+
+      .finally(() => {
+        setLoading(0);
       });
+
   };
 
   return (
@@ -244,7 +257,11 @@ const FormComponent = () => {
                 fullWidth
                 sx={{ mt: 2 }}
               >
-                Analyze
+                { loading ? (
+                  <CircularProgress size={25} sx={{color:"white"}}  thickness={5} />
+                ) : (
+                  <span>Analyze</span>
+                )}
               </Button>
             </>
           )}
