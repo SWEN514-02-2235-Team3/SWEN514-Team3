@@ -220,7 +220,7 @@ def main():
             bar()
             
     logs_generated = check_if_lambda_logs_generated(group_name, bucket_name) # check if the currently deployed lambda has logs
-    with alive_progress.alive_bar(title="Still waiting...", monitor=False, stats=False, spinner=None) as bar:
+    with alive_progress.alive_bar(title="Polling until the s3 trigger is initalized...", monitor=False, stats=False, spinner=None) as bar:
         i = 0
         while not logs_generated:
             time.sleep(0.1)
