@@ -10,13 +10,13 @@ resource "aws_amplify_app" "sa-app" {
       phases:
         preBuild:
           commands:
-            - cd frontend/   # Navigate to the frontend directory
+            - cd frontend/   # Navigate to the frontend directory from the root repository
             - npm install
         build:
           commands:
             - npm run build
       artifacts:
-        baseDirectory: frontend/build   # Specify the path to the build directory inside frontend/
+        baseDirectory: frontend/build # build directory is generated after running `npm run build`
         files:
           - '**/*'
       cache:
@@ -34,6 +34,7 @@ resource "aws_amplify_app" "sa-app" {
   }
   depends_on = [ aws_lambda_permission.lambda_s3_trigger_source, aws_lambda_function.lambda_s3_datasets, aws_dynamodb_table.db_sa_data, aws_s3_bucket.s3_bucket_sentianalysis ]
 }
+
 
 terraform {
   required_providers {
