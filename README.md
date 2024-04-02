@@ -10,67 +10,65 @@
 
 ![image](https://github.com/jym2584/SWEN514-Team3/assets/67706639/521b4a72-9b17-487c-83f0-a2a8341443f4)
 
----
+------------------------------------------------------------------
 
-# How to Deploy using GitHub
-
-WIP
-
----
-
-# Local Development & Deployment
-
-## Dependencies
-
+# Dependencies
 - Node.js
 - Terraform CLI
-  - https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli#install-terraform
 - Python
+- `aws_provider.tf` with the required credentials created (see AWS Deployment Instructions -> Setup)
+# AWS Deployment Instructions
+## Setup
+- Fork the GitHub repository
+  - A fork is needed because AWS AMplify requires you to be a repository owner, which private repos don't have.
+- On the repository, create `aws_provider.tf` under the `terraform/` directory and paste the following contents:
+  ```
+  /*
+  Input AWS and GitHub credentials
+  
+  */
+  provider "aws" {
+    region                      = "${var.region}"
+    access_key                  = ""
+    secret_key                  = ""
+  }
+  
+  
+  variable "swen514_repo_fork" {
+    description = "Input the github repo url to host the amplify app to (If you're a collaborator of the original repo then you need to create a fork and reference that)"
+    default     = "https://github.com/jym2584/SWEN514-Team3"
+  }
+  
+  variable "github_token" {
+    description = "Input github token (classic) to deploy amplify app"
+    default     = ""
+  }
+  ```
+  - From the above, fill in the required variables.
 
-You can run `setup_dependencies.bat` or `setup_dependencies.sh` to setup the local repository or inspect the script and run the commands.
+## Installing Dependencies
+Assuming you have all of the dependencies installed:
+- Run `sh setup_dependencies.sh` or `.\setup_dependencies.bat` OR:
+  - On the root directory, run `pip install -r requirements.txt`
+  - On the root directory, run `cd terraform/ && terraform init`
+  - **FOR LOCAL FRONTEND DEVELOPMENT:** run `cd frontend/ && npm install --force`
+    - If you're just concerned with deploying the AWS infrastructure then this is not needed.
 
-## How to Deploy Locally
+## Deploy/Teardown AWS Infrastructure
+Scripts have been provided to aid with the deployment process.
+- `deploy` - Deploys the AWS infrastructure using Terraform then uploads the datasets to AWS S3
+  MANUAL COMMANDS:
+  - `cd terraform/ && terraform apply`
+  - `cd data/ && py upload_datasets.py`
+- `teardown` - Destroys the AWS infrastructure
 
-**Pre-requisites**
+### Deploying the front-end locally
+After the AWS Infrastructure has been setup then run:
+- `cd frontend/ && npm start`
 
-- Terraform CLI is installed
-- AWS Credentials are setup via terraform or within a terraform script
-  - If you want to set it up locally within the repository
-    - Fetch your AWS Access and Secret Key from the AWS Console
-    - Create `aws_provider.tf` under `terraform/` (this file will not be checked into the remote repository)
-      ```
-      provider "aws" {
-          region = "${var.region}"
-          access_key = "<YOUR AWS ACCESS KEY HERE>"
-          secret_key = "<YOUR AWS SECRET KEY HERE>"
-      }
-      ```
-
-**Instructions**
-
-```
-cd terraform/
-terraform apply                    # standup aws infrastructure
-python ../data/upload_datasets.py  # this is used to upload the datasets after deploying the terraform infrastructure
-```
-
-Terraform apply stands up the AWS infrastructure & code needed to run the application.
-
-## How to develop locally
-
-TODO INSTRUCTIONS
-
-- If needed, deploy the entire terraform backend stack.
-  - This will allow you to develop lambda code.
-- Front-end
-  - **TODO INSTRUCTIONS**: Setup configuration to fetch required endpoints to run the application
-  - Run the node.js application: `cd frontend/ && npm start`
-
----
-
-# GitHub Repository Setup
-
-This only needs to be done once as an initial setup
+------------------------------------------------------------------
+# GitHub Actions Setup (Not required)
+At the moment, this only applies to testing the terraform infrastructure. The workflow does a `terraform plan` with AWS credentials (stored as secrets).  **This only needs to be done.**
 
 ## GitHub Secrets
 
