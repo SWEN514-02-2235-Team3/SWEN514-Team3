@@ -44,7 +44,8 @@
     default     = ""
   }
   ```
-  - From the above, fill in the required variables.
+    - From the above, fill in the required variables.
+    - **NOTE:** This will NOT be checked into the repository (added to .gitignore)
 
 ## Installing Dependencies
 Assuming you have all of the dependencies installed:
