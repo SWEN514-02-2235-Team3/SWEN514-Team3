@@ -1,23 +1,33 @@
-# Sentiment Analysis Project (Team 3)
-
-- Saranya Dadi
-- Greg Villafane
-- Jackson Murphy
-- Nick Grosskopf
-- Jin Moon
-
-# Cloud Architecture
-
-![image](https://github.com/jym2584/SWEN514-Team3/assets/67706639/521b4a72-9b17-487c-83f0-a2a8341443f4)
+# COVID-19 Sentiment Analysis (Team 3)
+- Saranya Dadi, Greg Villafane, Jackson Murphy, Nick Grosskopf, Jin Moon
+This project analyzes sentiments of comments from multiple sources (YouTube, Reddit, Twitter). Currently, these sources come from a collection of datasets from Kaggle.
 
 ------------------------------------------------------------------
 
-# Software Dependencies
+# Cloud Architecture Diagram
+![image](https://github.com/jym2584/SWEN514-Team3/assets/67706639/521b4a72-9b17-487c-83f0-a2a8341443f4)
+
+# AWS Services being deployed
+
+- Front-end
+  - AWS Amplify: Currently being used to host react front-end 
+- Back-end
+  - API Gateway: Endpoint to retrieve sentiments
+  - Lambdas:
+    - One to serve as a request to DynamoDB to retrieve sentiments
+    - Another that is triggered from S3 upload. Processes the datasets to upload it to DynamoDB
+  - S3 Bucket: Stores datasets. Lambda is triggered to process the datasets
+  - DynamoDB: Processed datasets are stored here
+  - Comprehend: Processes comments from datasets to retrieve their sentiments
+
+------------------------------------------------------------------
+
+# AWS Deployment Instructions
+## Software Dependencies
 - Node.js (OPTIONAL if not doing local development)
 - Terraform CLI (REQUIRED)
 - Python (REQUIRED with pip dependencies)
-
-# AWS Deployment Instructions
+- 
 ## Setup
 - Fork the GitHub repository
   - A fork is needed because AWS AMplify requires you to be a repository owner, which private repos don't have.
