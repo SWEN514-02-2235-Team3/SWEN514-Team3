@@ -180,11 +180,19 @@ def main():
         #     break
         
         while not credentials_valid:
-            aws_access_key = input("AWS Access Key: ")
-            aws_secret_key = input("AWS Secret Key: ")
+            access_key = input("AWS Access Key: ")
+            secret_key = input("AWS Secret Key: ")
             try: 
                 global s3_client
-                s3_client = boto3.client('s3', aws_access_key_id=aws_access_key, aws_secret_access_key=aws_secret_key)
+                global lambda_client
+                global cloudwatch_client
+                global ACCESS_KEY
+                global SECRET_KEY
+                ACCESS_KEY = access_key
+                SECRET_KEY = secret_key
+                s3_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name="us-east-1")
+                lambda_client = boto3.client('lambda', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
+                cloudwatch_client = boto3.client('logs', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
                 credentials_found = True
                 credentials_valid = True
             except:
