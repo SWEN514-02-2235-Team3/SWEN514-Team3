@@ -60,8 +60,8 @@ Assuming you have all of the dependencies installed:
 Scripts have been provided to aid with the deployment process.
 - `deploy (.bat|.sh)` - Deploys the AWS infrastructure using Terraform then uploads the datasets to AWS S3
   - **MANUAL COMMANDS:**
-    - `cd terraform/ && terraform apply`
-    - `cd data/ && py upload_datasets.py`
+    - `cd terraform/ && terraform apply` - Required to deploy the AWS infrastructure
+    - `cd data/ && py upload_datasets.py` - Required to upload the stored datasets to s3 --> comprehend --> dynamodb
 - `teardown (.bat|.sh)` - Destroys the AWS infrastructure
   - **MANUAL COMMANDS:**
     - `cd terraform/ && terraform destroy`
@@ -69,6 +69,11 @@ Scripts have been provided to aid with the deployment process.
 ### Deploying the front-end locally
 After the AWS Infrastructure has been setup then run:
 - `cd frontend/ && npm start`
+
+## After Deploying
+- Go to the AWS Console > Amplify to get the link of the full stack application (Sentiment Analysis App).
+  - It should be automatically deployed, but if not then run the build within the console.
+- Once it has been deployed then you'll be able to interact with the datasets.
 
 ------------------------------------------------------------------
 # GitHub Actions Setup (Not required)
