@@ -58,11 +58,13 @@ Assuming you have all of the dependencies installed:
 
 ## Deploy/Teardown AWS Infrastructure
 Scripts have been provided to aid with the deployment process.
-- `deploy` - Deploys the AWS infrastructure using Terraform then uploads the datasets to AWS S3
-  MANUAL COMMANDS:
-  - `cd terraform/ && terraform apply`
-  - `cd data/ && py upload_datasets.py`
-- `teardown` - Destroys the AWS infrastructure
+- `deploy (.bat|.sh)` - Deploys the AWS infrastructure using Terraform then uploads the datasets to AWS S3
+  - **MANUAL COMMANDS:**
+    - `cd terraform/ && terraform apply`
+    - `cd data/ && py upload_datasets.py`
+- `teardown (.bat|.sh)` - Destroys the AWS infrastructure
+  - **MANUAL COMMANDS:**
+    - `cd terraform/ && terraform destroy`
 
 ### Deploying the front-end locally
 After the AWS Infrastructure has been setup then run:
