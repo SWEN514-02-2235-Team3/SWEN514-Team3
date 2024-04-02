@@ -12,12 +12,10 @@
 
 ------------------------------------------------------------------
 
-# Dependencies
+# Software Dependencies
 - Node.js (OPTIONAL if not doing local development)
 - Terraform CLI (REQUIRED)
 - Python (REQUIRED with pip dependencies)
-- `terraform/aws_provider.tf` with the required credentials created (REQUIRED)
-  - See AWS Deployment Instructions -> Setup
 
 # AWS Deployment Instructions
 ## Setup
