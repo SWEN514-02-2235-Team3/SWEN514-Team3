@@ -57,8 +57,8 @@ This project analyzes sentiments of comments from multiple sources (YouTube, Red
     - From the above, fill in the required variables.
     - **NOTE:** This will NOT be checked into the repository (added to .gitignore)
 
-## Installing Dependencies
-Assuming you have all of the dependencies installed:
+## Installing Project Dependencies
+Assuming you have all of the software dependencies installed:
 - Run `sh setup_dependencies.sh` or `.\setup_dependencies.bat` OR:
   - On the root directory, run `pip install -r requirements.txt`
   - On the root directory, run `cd terraform/ && terraform init`
