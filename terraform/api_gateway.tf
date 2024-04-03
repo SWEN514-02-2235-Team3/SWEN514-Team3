@@ -45,7 +45,8 @@ resource "aws_api_gateway_method" "get_sentiments_method" {
     "method.request.querystring.source"     = false,
     "method.request.querystring.limit"      = false,
     "method.request.querystring.date_range_from" = false,
-    "method.request.querystring.date_range_to"   = false
+    "method.request.querystring.date_range_to"   = false,
+    "method.request.header.Authorization" = true, # authorization header required
   }
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 
@@ -73,10 +74,11 @@ resource "aws_api_gateway_integration" "lambda" {
   uri                     = aws_lambda_function.get_sentiments.invoke_arn # Saranya's lambda function
   credentials             = aws_iam_role.sa_api_gateway_role.arn
   request_parameters = {
-    "integration.request.querystring.source"        = "method.request.querystring.source" # source = method.request.querystring.source
-    "integration.request.querystring.limit"         = "method.request.querystring.limit"
+    "integration.request.querystring.source"             = "method.request.querystring.source" # source = method.request.querystring.source
+    "integration.request.querystring.limit"              = "method.request.querystring.limit"
     "integration.request.querystring.date_range_from"    = "method.request.querystring.date_range_from"
     "integration.request.querystring.date_range_to"      = "method.request.querystring.date_range_to"
+    "integration.request.header.Authorization"           = "method.request.header.Authorization"
   }
 
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_method.get_sentiments_method, aws_api_gateway_resource.sentiments_resource ]
