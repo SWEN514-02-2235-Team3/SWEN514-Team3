@@ -2,8 +2,6 @@ import React, { useState } from "react";
 import {
   Container,
   Typography,
-  FormGroup,
-  Checkbox,
   Button,
   Box,
   createTheme,
@@ -17,9 +15,6 @@ import {
   FormLabel,
   CircularProgress,
 } from "@mui/material";
-
-import { LoadingButton } from "@mui/lab";
-
 import WordCloudComponent from "./WordCloudComponent";
 import BarChartComponent from "./BarChartComponent";
 import PieChartComponent from "./PieChartComponent";
