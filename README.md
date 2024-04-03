@@ -45,8 +45,8 @@ This project analyzes sentiments of comments from multiple sources (YouTube, Red
   }
   
   
-  variable "swen514_repo_fork" {
-    description = "Input the github repo url to host the amplify app to (If you're a collaborator of the original repo then you need to create a fork and reference that)"
+  variable "swen514_repo" {
+    description = "Input the github repo url that Amplify will grab the source code from"
     default     = "https://github.com/SWEN514-02-2235-Team3/SWEN514-Team3" // don't need to change this since we're an org now
   }
   
