@@ -18,7 +18,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 
-import { LoadingButton } from '@mui/lab';
+import { LoadingButton } from "@mui/lab";
 
 import WordCloudComponent from "./WordCloudComponent";
 import BarChartComponent from "./BarChartComponent";
@@ -63,7 +63,6 @@ const FormComponent = () => {
 
   const [loading, setLoading] = useState(0);
 
-
   const handlePlatformChange = (event) => {
     setPlatforms(event.target.value);
   };
@@ -77,6 +76,7 @@ const FormComponent = () => {
   const handleReturn = () => {
     setAnalysisData(null);
     setDisplayMode("form");
+    setStep(1);
   };
 
   const handleBack = () => {
@@ -108,22 +108,21 @@ const FormComponent = () => {
     fetch(urlWithParams, {
       method: "GET",
     })
-      .then(response => response.json())
+      .then((response) => response.json())
 
-      .then(data => {
+      .then((data) => {
         setAnalysisData(data);
         setDisplayMode("wordCloud");
         console.log(data);
       })
 
-      .catch(error => {
+      .catch((error) => {
         console.error("Error fetching data:", error);
       })
 
       .finally(() => {
         setLoading(0);
       });
-
   };
 
   return (
@@ -257,8 +256,12 @@ const FormComponent = () => {
                 fullWidth
                 sx={{ mt: 2 }}
               >
-                { loading ? (
-                  <CircularProgress size={25} sx={{color:"white"}}  thickness={5} />
+                {loading ? (
+                  <CircularProgress
+                    size={25}
+                    sx={{ color: "white" }}
+                    thickness={5}
+                  />
                 ) : (
                   <span>Analyze</span>
                 )}
