@@ -50,35 +50,38 @@ def get_credentials_from_terraform(path=f"{SCRIPT_PATH}/../terraform/aws_provide
         return True
     return False
 
-def get_credentials_from_aws_config():
-    """Gets AWS credentials from AWS config
-    """
-    plat = platform.system()
-    credentials_path = None
-    if plat == "Windows": 
-        pass
-        # credentials_path = f"C:/Users/{os.getenv('USERPROFILE').split('\\')[-1]}/.aws/credentials"
-    else: credentials_path = "~/.aws/credentials"
-    with open(credentials_path, 'r') as file:
-        for line in file:
-            if line.startswith("aws_access_key_id"):
-                access_key = line.split("=")[1].strip()
-            elif line.startswith("aws_secret_access_key"):
-                secret_key = line.split("=")[1].strip()
+#
+# NOT NEEDED SINCE terraform/aws_provider.tf IS REQUIRED NOW.
+#
+# def get_credentials_from_aws_config():
+#     """Gets AWS credentials from AWS config
+#     """
+#     plat = platform.system()
+#     credentials_path = None
+#     if plat == "Windows": 
+#         pass
+#         # credentials_path = f"C:/Users/{os.getenv('USERPROFILE').split('\\')[-1]}/.aws/credentials"
+#     else: credentials_path = "~/.aws/credentials"
+#     with open(credentials_path, 'r') as file:
+#         for line in file:
+#             if line.startswith("aws_access_key_id"):
+#                 access_key = line.split("=")[1].strip()
+#             elif line.startswith("aws_secret_access_key"):
+#                 secret_key = line.split("=")[1].strip()
     
-    if access_key and secret_key:
-        global s3_client
-        global lambda_client
-        global cloudwatch_client
-        global ACCESS_KEY
-        global SECRET_KEY
-        ACCESS_KEY = access_key
-        SECRET_KEY = secret_key
-        s3_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
-        lambda_client = boto3.client('lambda', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
-        cloudwatch_client = boto3.client('logs', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
-        return True
-    return False
+#     if access_key and secret_key:
+#         global s3_client
+#         global lambda_client
+#         global cloudwatch_client
+#         global ACCESS_KEY
+#         global SECRET_KEY
+#         ACCESS_KEY = access_key
+#         SECRET_KEY = secret_key
+#         s3_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
+#         lambda_client = boto3.client('lambda', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
+#         cloudwatch_client = boto3.client('logs', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
+#         return True
+#     return False
 
 def s3_get_bucket_name(bucket_regex="swen514-sa-datasets"):
     """Gets the full bucket name from a partial name
@@ -171,17 +174,25 @@ def main():
             credentials_found = True
             print("Found AWS credentials from terraform.")
             break
-        elif get_credentials_from_aws_config():
-            credentials_found = True
-            print("Found AWS credentials from the AWS config.")
-            break
+        # elif get_credentials_from_aws_config():
+        #     credentials_found = True
+        #     print("Found AWS credentials from the AWS config.")
+        #     break
         
         while not credentials_valid:
-            aws_access_key = input("AWS Access Key: ")
-            aws_secret_key = input("AWS Secret Key: ")
+            access_key = input("AWS Access Key: ")
+            secret_key = input("AWS Secret Key: ")
             try: 
                 global s3_client
-                s3_client = boto3.client('s3', aws_access_key_id=aws_access_key, aws_secret_access_key=aws_secret_key)
+                global lambda_client
+                global cloudwatch_client
+                global ACCESS_KEY
+                global SECRET_KEY
+                ACCESS_KEY = access_key
+                SECRET_KEY = secret_key
+                s3_client = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY, region_name="us-east-1")
+                lambda_client = boto3.client('lambda', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
+                cloudwatch_client = boto3.client('logs', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY,region_name="us-east-1")
                 credentials_found = True
                 credentials_valid = True
             except:
