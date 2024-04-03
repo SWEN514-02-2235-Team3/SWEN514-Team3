@@ -1,5 +1,6 @@
 # COVID-19 Sentiment Analysis (Team 3)
 - Saranya Dadi, Greg Villafane, Jackson Murphy, Nick Grosskopf, Jin Moon
+
 This project analyzes sentiments of comments from multiple sources (YouTube, Reddit, Twitter). Currently, these sources come from a collection of datasets from Kaggle.
 
 ------------------------------------------------------------------
