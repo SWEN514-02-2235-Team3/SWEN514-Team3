@@ -28,7 +28,7 @@ This project analyzes sentiments of comments from multiple sources (YouTube, Red
 - Node.js (OPTIONAL if not doing local development)
 - Terraform CLI (REQUIRED)
 - Python (REQUIRED with pip dependencies)
-- 
+
 ## Setup
 - Fork the GitHub repository
   - A fork is needed because AWS AMplify requires you to be a repository owner, which private repos don't have.
@@ -47,7 +47,7 @@ This project analyzes sentiments of comments from multiple sources (YouTube, Red
   
   variable "swen514_repo_fork" {
     description = "Input the github repo url to host the amplify app to (If you're a collaborator of the original repo then you need to create a fork and reference that)"
-    default     = "https://github.com/jym2584/SWEN514-Team3"
+    default     = "https://github.com/SWEN514-02-2235-Team3/SWEN514-Team3" // don't need to change this since we're an org now
   }
   
   variable "github_token" {
