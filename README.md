@@ -30,8 +30,7 @@ This project analyzes sentiments of comments from multiple sources (YouTube, Red
 - Python (REQUIRED with pip dependencies)
 
 ## Setup
-- Fork the GitHub repository
-  - A fork is needed because AWS AMplify requires you to be a repository owner, which private repos don't have.
+- Clone the repository
 - On the repository, create `aws_provider.tf` under the `terraform/` directory and paste the following contents:
   ```
   /*
