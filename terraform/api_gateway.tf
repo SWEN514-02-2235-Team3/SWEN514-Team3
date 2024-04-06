@@ -73,8 +73,8 @@ resource "aws_api_gateway_integration" "lambda" {
   uri                     = aws_lambda_function.get_sentiments.invoke_arn # Saranya's lambda function
   credentials             = aws_iam_role.sa_api_gateway_role.arn
   request_parameters = {
-    "integration.request.querystring.source"        = "method.request.querystring.source" # source = method.request.querystring.source
-    "integration.request.querystring.limit"         = "method.request.querystring.limit"
+    "integration.request.querystring.source"             = "method.request.querystring.source" # source = method.request.querystring.source
+    "integration.request.querystring.limit"              = "method.request.querystring.limit"
     "integration.request.querystring.date_range_from"    = "method.request.querystring.date_range_from"
     "integration.request.querystring.date_range_to"      = "method.request.querystring.date_range_to"
   }
@@ -158,8 +158,9 @@ resource "aws_iam_role_policy_attachment" "sa_api_gateway_lambda_policy_attachme
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 }
 
+
 /**********************************
-    Enable CORS if needed
+    Enable CORS
 *************************************/
 
 resource "aws_api_gateway_method" "options_method" {
@@ -224,16 +225,18 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
 }
 
 # Generate .env to store API Gateway URL
-resource "null_resource" "generate_env_file" {
-  triggers = {
-    always_run = "${timestamp()}"
-  }
+data "template_file" "env_template" {
+  template = file("env_template.tpl")
 
-  provisioner "local-exec" {
-    command = <<-EOF
-      echo REACT_APP_API_URL=${aws_api_gateway_deployment.sa_api_gateway_deployment.invoke_url}  > ../frontend/.env
-    EOF
+  vars = {
+    api_gateway_url = aws_api_gateway_deployment.sa_api_gateway_deployment.invoke_url
   }
 
   depends_on = [ aws_api_gateway_deployment.sa_api_gateway_deployment ]
+}
+
+resource "local_file" "env_file" {
+  content  = data.template_file.env_template.rendered
+  filename = "../frontend/.env"
+  depends_on = [ data.template_file.env_template, aws_api_gateway_deployment.sa_api_gateway_deployment ]
 }
