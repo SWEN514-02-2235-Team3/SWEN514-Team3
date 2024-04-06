@@ -3,7 +3,6 @@ import subprocess
 from datetime import datetime, timedelta
 import os
 import re 
-from plyer import notification
 
 output_text = None
 
@@ -55,13 +54,6 @@ def main():
     output_text.insert(tk.END, "CLI output for terraform destroy")
     
     scrollbar.config(command=output_text.yview)
-    notification.notify(
-        title='Teardown Timer',
-        message='Started teardown timer...',
-        app_icon=None, 
-        timeout=10, 
-    )
-
 
     root.mainloop()
 
