@@ -46,7 +46,7 @@ resource "aws_api_gateway_method" "get_sentiments_method" {
     "method.request.querystring.limit"      = false,
     "method.request.querystring.date_range_from" = false,
     "method.request.querystring.date_range_to"   = false,
-    "method.request.header.Authorization" = true, # authorization header required
+    "method.request.header.x-api-key" = true 
   }
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 
@@ -78,7 +78,6 @@ resource "aws_api_gateway_integration" "lambda" {
     "integration.request.querystring.limit"              = "method.request.querystring.limit"
     "integration.request.querystring.date_range_from"    = "method.request.querystring.date_range_from"
     "integration.request.querystring.date_range_to"      = "method.request.querystring.date_range_to"
-    "integration.request.header.Authorization"           = "method.request.header.Authorization"
   }
 
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_method.get_sentiments_method, aws_api_gateway_resource.sentiments_resource ]
@@ -160,8 +159,34 @@ resource "aws_iam_role_policy_attachment" "sa_api_gateway_lambda_policy_attachme
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 }
 
+
+// Create API Key
+resource "aws_api_gateway_api_key" "sa_api_gateway_key" {
+  name = "sa_api_gateway_key"
+  description = "API Key for SA API Gateway"
+  enabled = true
+}
+
+// Usage Plan
+resource "aws_api_gateway_usage_plan" "sa_api_gateway_usage_plan" {
+  name = "sa_api_gateway_usage_plan"
+  description = "Usage Plan for SA API Gateway"
+  api_stages {
+    api_id = aws_api_gateway_rest_api.sa_api_gateway.id
+    stage = aws_api_gateway_deployment.sa_api_gateway_deployment.stage_name
+  }
+}
+
+// Attach API Key to Usage Plan
+resource "aws_api_gateway_usage_plan_key" "sa_api_gateway_usage_plan_key" {
+  key_id = aws_api_gateway_api_key.sa_api_gateway_key.id
+  key_type = "API_KEY"
+  usage_plan_id = aws_api_gateway_usage_plan.sa_api_gateway_usage_plan.id
+}
+
+
 /**********************************
-    Enable CORS if needed
+    Enable CORS
 *************************************/
 
 resource "aws_api_gateway_method" "options_method" {
@@ -226,16 +251,19 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
 }
 
 # Generate .env to store API Gateway URL
-resource "null_resource" "generate_env_file" {
-  triggers = {
-    always_run = "${timestamp()}"
+data "template_file" "env_template" {
+  template = file("env_template.tpl")
+
+  vars = {
+    api_gateway_url = aws_api_gateway_deployment.sa_api_gateway_deployment.invoke_url
+    api_key         = aws_api_gateway_api_key.sa_api_gateway_key.value
   }
 
-  provisioner "local-exec" {
-    command = <<-EOF
-      echo REACT_APP_API_URL=${aws_api_gateway_deployment.sa_api_gateway_deployment.invoke_url}  > ../frontend/.env
-    EOF
-  }
+  depends_on = [ aws_api_gateway_deployment.sa_api_gateway_deployment, aws_api_gateway_api_key.sa_api_gateway_key ]
+}
 
-  depends_on = [ aws_api_gateway_deployment.sa_api_gateway_deployment ]
+resource "local_file" "env_file" {
+  content  = data.template_file.env_template.rendered
+  filename = "../frontend/.env"
+  depends_on = [ data.template_file.env_template, aws_api_gateway_deployment.sa_api_gateway_deployment, aws_api_gateway_api_key.sa_api_gateway_key ]
 }
