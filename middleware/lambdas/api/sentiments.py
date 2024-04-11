@@ -8,7 +8,7 @@ table = dynamodb.Table('SentAnalysisDataResults')
 def lambda_handler(event, context):
     """GET sentiments/ endpoint lambda
     """
-
+    print(event)
     # get the parameters
     parameters_query = event.get("queryStringParameters", {})    
     limit = None
