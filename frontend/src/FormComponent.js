@@ -108,7 +108,6 @@ const FormComponent = () => {
       .then((data) => {
         setAnalysisData(data);
         setDisplayMode("wordCloud");
-        console.log(data);
       })
 
       .catch((error) => {
