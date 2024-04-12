@@ -2,6 +2,8 @@ import json
 import os
 import googleapiclient.discovery
 from datetime import datetime
+import boto3
+import botocore.exceptions
 
 # Your API key
 api_key = "AIzaSyBwar2tkCtOhYkkQngj6qTZuvSnyU6GuM0"
