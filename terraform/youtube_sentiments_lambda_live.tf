@@ -88,3 +88,22 @@ resource "aws_iam_role_policy" "lambda_s3_sentiments_youtube_policy_dynamodb" {
 
   depends_on = [aws_iam_role.lambda_s3_sentiments_youtube_role]
 }
+
+# Comprehend Policy
+resource "aws_iam_role_policy" "lambda_s3_sentiments_youtube_policy_comprehend" {
+  name = "sa_youtube_comprehend_policy"
+  role = aws_iam_role.lambda_s3_sentiments_youtube_role.name
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid      = "VisualEditor0"
+        Effect   = "Allow"
+        Action   = "comprehend:DetectSentiment"
+        Resource = "*"
+      }
+    ]
+  })
+
+  depends_on = [aws_iam_role.lambda_s3_sentiments_youtube_role]
+}
