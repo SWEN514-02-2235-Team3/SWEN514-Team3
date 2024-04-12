@@ -1,17 +1,17 @@
 # package up python code for sentiments
-data "archive_file" "lambda_s3_sentiments_code" {
+data "archive_file" "lambda_s3_sentiments_youtube_code" {
   type        = "zip"
-  source_dir  = "../middleware/lambdas/api/get_sentiments"           # since middleware/ is within the root repo 
-  output_path = "../terraform_temp/sentiments_apis.zip" # store zip locally within a temp directory
+  source_dir  = "../middleware/lambdas/api/youtube_api_template"           # since middleware/ is within the root repo 
+  output_path = "../terraform_temp/youtube_api_template.zip" # store zip locally within a temp directory
 }
 
 # lambda function
 resource "aws_lambda_function" "get_sentiments" {
-  filename      = data.archive_file.lambda_s3_sentiments_code.output_path
-  function_name = "get_sentiments"
+  filename      = data.archive_file.lambda_s3_sentiments_youtube_code.output_path
+  function_name = "live_data_lambda"
   role          = aws_iam_role.lambda_s3_sentiments_role.arn
-  handler       = "sentiments.lambda_handler"
-  runtime       = "python3.10"
+  handler       = "livedata.lambda_handler"
+  runtime       = "python3.8"
   timeout       = 60 # 1 minute timeout
   
   environment {
@@ -22,8 +22,8 @@ resource "aws_lambda_function" "get_sentiments" {
 }
 
 # IAM Role
-resource "aws_iam_role" "lambda_s3_sentiments_role" {
-  name = "sa_lambda_sentiments_role"
+resource "aws_iam_role" "lambda_s3_sentiments_youtube_role" {
+  name = "sa_lambda_sentiments_youtube_role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -41,22 +41,22 @@ resource "aws_iam_role" "lambda_s3_sentiments_role" {
   depends_on = [aws_dynamodb_table.db_sa_data]
 }
 # AWS Managed Policies
-resource "aws_iam_role_policy_attachment" "lambda_s3_sentiments_policy_attach" {
+resource "aws_iam_role_policy_attachment" "lambda_s3_sentiments_youtube_policy_attach" {
   for_each = toset([
     "arn:aws:iam::aws:policy/AmazonS3FullAccess",                      # s3 access
     "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole" # cloudwatch
   ])
 
-  role       = aws_iam_role.lambda_s3_sentiments_role.name
+  role       = aws_iam_role.lambda_s3_sentiments_youtube_role.name
   policy_arn = each.key
 
-  depends_on = [aws_iam_role.lambda_s3_sentiments_role]
+  depends_on = [aws_iam_role.lambda_s3_sentiments_youtube_role]
 }
 
 # DynamoDB policy
-resource "aws_iam_role_policy" "lambda_s3_sentiments_policy_dynamodb" {
-  name = "sa_dynamodb_policy"
-  role = aws_iam_role.lambda_s3_sentiments_role.name
+resource "aws_iam_role_policy" "lambda_s3_sentiments_youtube_policy_dynamodb" {
+  name = "sa_youtube_dynamodb_policy"
+  role = aws_iam_role.lambda_s3_sentiments_youtube_role.name
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -86,5 +86,5 @@ resource "aws_iam_role_policy" "lambda_s3_sentiments_policy_dynamodb" {
     ]
   })
 
-  depends_on = [aws_iam_role.lambda_s3_sentiments_role]
+  depends_on = [aws_iam_role.lambda_s3_sentiments_youtube_role]
 }
