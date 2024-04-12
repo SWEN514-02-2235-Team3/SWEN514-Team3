@@ -6,10 +6,10 @@ data "archive_file" "lambda_s3_sentiments_youtube_code" {
 }
 
 # lambda function
-resource "aws_lambda_function" "get_sentiments" {
+resource "aws_lambda_function" "get_sentiments_youtube" {
   filename      = data.archive_file.lambda_s3_sentiments_youtube_code.output_path
   function_name = "live_data_lambda"
-  role          = aws_iam_role.lambda_s3_sentiments_role.arn
+  role          = aws_iam_role.lambda_s3_sentiments_youtube_role.arn
   handler       = "livedata.lambda_handler"
   runtime       = "python3.8"
   timeout       = 60 # 1 minute timeout
