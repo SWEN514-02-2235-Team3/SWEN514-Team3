@@ -1,17 +1,12 @@
 import json
-
-# -*- coding: utf-8 -*-
-
-# Sample Python code for youtube.search.list
-# See instructions for running these code samples locally:
-# https://developers.google.com/explorer-help/code-samples#python
-
 import os
 import googleapiclient.discovery
 from datetime import datetime
 
 # Your API key
 api_key = "AIzaSyBwar2tkCtOhYkkQngj6qTZuvSnyU6GuM0"
+comprehend_client = boto3.client("comprehend")
+dynamodb_client = boto3.client("dynamodb")
 
 def lambda_handler(event, context):
 
@@ -20,6 +15,7 @@ def lambda_handler(event, context):
     api_version = "v3"
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
+    # Optional Params
     region = event.get('region') if event.get('region') else None
     max_results = event.get('max_results') if event.get('max_results') else None
 
@@ -34,9 +30,6 @@ def lambda_handler(event, context):
         date_to = datetime.strptime(date_to_str, "%Y-%m-%d").isoformat() + "Z"
     else:
         date_to = None
-
-    print(f"[DEBUG] date_from: {date_from}")
-    print(f"[DEBUG] date_to: {date_to}")
 
     # Build the YouTube API client using API key
     youtube = googleapiclient.discovery.build(
@@ -55,21 +48,45 @@ def lambda_handler(event, context):
     )
     response = request.execute()
 
+    # Parse Response
     items = response['items']
     info = []
     region = {'region' : response['regionCode']}
     info.append(region)
 
     for each in items:
+
+        video_id = each['id']['videoId']
         snippet = each['snippet']
         title = snippet['title']
-        publish_time = snippet['publishTime']
+        publish_date = snippet['publishedAt']
         description = snippet['description']
+        comment = title + description
+        sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment'] # Generate Sentiment
+
         item = {
-            'title': title,
-            'publish_time': publish_time,
-            'description': description
+            'id': video_id,
+            'comment': comment,
+            'publish_date': publish_date,
+            'sentiment': sentiment
         }
         info.append(item)
+
+        # Generate a non-blocking UUID and insert record to dynamodb
+        for _ in range(3):
+            try:
+                dynamodb_client.put_item(
+                    TableName="SentAnalysisDataResults",
+                    Item={
+                        'id': {'S':video_id}, # set a random id
+                        'comment_date': {'S': publish_date},
+                        'comment': {'S': comment},
+                        'sentiment': {'S' : sentiment},
+                        'platform': {'S': 'youtube_live'},
+                    }
+                )  
+                break # break the loop 
+            except botocore.exceptions.ClientError: # dont process dataset
+                print(f"WARNING: Couldn't upload {item} to dynamodb...")
 
     return info
