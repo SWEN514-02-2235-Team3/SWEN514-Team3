@@ -4,6 +4,7 @@ import googleapiclient.discovery
 from datetime import datetime
 import boto3
 import botocore.exceptions
+from dateutil.parser import parse
 
 # Your API key
 api_key = "AIzaSyBwar2tkCtOhYkkQngj6qTZuvSnyU6GuM0"
@@ -23,6 +24,11 @@ def lambda_handler(event, context):
     date_from_str = None
     date_to_str = None
     
+    date_from = None
+    date_to = None
+    
+    generated_sentiments = 0
+    
     try:
         max_results = int(query_string.get("max_results"))
     except: pass
@@ -38,10 +44,9 @@ def lambda_handler(event, context):
 
     if date_from_str:
         date_from = datetime.strptime(date_from_str, "%Y-%m-%d").isoformat() + "Z"
+
     if date_to_str:
         date_to = datetime.strptime(date_to_str, "%Y-%m-%d").isoformat() + "Z"
-    else:
-        date_to = None
 
     # Build the YouTube API client using API key
     youtube = googleapiclient.discovery.build(
@@ -67,15 +72,8 @@ def lambda_handler(event, context):
     info.append(region)
 
     for each in items:
-
-        video_id = each['id']['videoId']
+        video_id = each['id']['videoId']        
         
-        snippet = each['snippet']
-        title = snippet['title']
-        publish_date = snippet['publishedAt']
-        description = snippet['description']
-        comment = title + description
-
         # Check if the item exists in the DynamoDB table
         response = dynamodb_client.get_item(
             TableName="SentAnalysisDataResults",
@@ -85,34 +83,58 @@ def lambda_handler(event, context):
         )
         # If the item exists, return True
         if 'Item' in response:
-            existing = False
             sentiment = response['Item'].get('sentiment', {}).get('S')
-            if sentiment:
-                return sentiment
-            else:
-                return "Sentiment not found for ID: {}".format(video_id)
+            if sentiment: 
+                print("Youtube comment already processed")
+                print(response['Item'])
+                continue # go onto the next item if we've already processed that youtube url
         else:
-            existing = True
-            sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment'] # Generate Sentiment
-            print("Item Already Exists in Table")
-
-        item = {
-            'id': video_id,
-            'comment': comment,
-            'publish_date': publish_date,
-            'sentiment': sentiment
+            print("PROCESSING YOUTUBE COMMENT")        
+            # Initial request to retrieve comment threads
+            request = youtube.commentThreads().list(
+                part="snippet",
+                videoId=video_id,
+                maxResults=100,  # Maximum number of results per page (adjust as needed)
+                textFormat="plainText"
+            )
+            response = request.execute()
+            for item in response['items']:
+                comment = item['snippet']['topLevelComment']['snippet']['textDisplay']
+                comment_date = item['snippet']['topLevelComment']['snippet']['publishedAt']
+                date = None
+                try: # parse date
+                    date = parse(comment_date, fuzzy=True)
+                    date = str(date)[:10]
+                except: continue # skip if its not a valid date
+                
+                sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment'] # Generate Sentiment
+                
+                item = {
+                    'id': video_id,
+                    'comment': comment,
+                    'publish_date': date,
+                    'sentiment': sentiment
+                }
+                print(item)
+                
+                for _ in range(3):
+                    try:
+                        put_record(video_id, date, comment, sentiment)
+                        generated_sentiments+=1
+                        break # break the loop 
+                    except botocore.exceptions.ClientError: # dont process dataset
+                        print(f"WARNING: Couldn't upload {item} to dynamodb...")
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+            "Access-Control-Allow-Origin": "*",# Required for CORS support to work
+            'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
+        },
+        'body': {
+            'sentiments_generated': generated_sentiments
         }
-        info.append(item)
-
-        if not existing:
-            for _ in range(3):
-                try:
-                    put_record(video_id, publish_date, comment, sentiment)
-                    break # break the loop 
-                except botocore.exceptions.ClientError: # dont process dataset
-                    print(f"WARNING: Couldn't upload {item} to dynamodb...")
-                    
-    return info
+    }
 
 def put_record(video_id, publish_date, comment, sentiment):
     # Generate a non-blocking UUID and insert record to dynamodb
