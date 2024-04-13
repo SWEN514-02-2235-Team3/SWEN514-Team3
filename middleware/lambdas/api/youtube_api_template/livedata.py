@@ -20,8 +20,8 @@ def lambda_handler(event, context):
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
     query_string = event.get("queryStringParameters", {})
-    region = None
-    max_results = None
+    region = "US"
+    max_results = 1
     date_from_str = None
     date_to_str = None
     
@@ -35,7 +35,7 @@ def lambda_handler(event, context):
         max_results = int(query_string.get("max_results"))
         if max_results > 10: max_results = 10
     except: 
-        max_results = 1
+        pass
     try:
         region = query_string.get("region").strip()
     except: pass
