@@ -17,18 +17,20 @@ def lambda_handler(event, context):
     api_version = "v3"
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-    # Optional Params
-    region = event.get('region') if event.get('region') else None
-    max_results = event.get('max_results') if event.get('max_results') else None
+    query_string = event.get("queryStringParameters", {})
 
-    if event.get('date_from'):
-        date_from_str = event.get('date_from')
+    # Optional Params
+    region = query_string.get('region') if query_string.get('region') else None
+    max_results = query_string.get('max_results') if query_string.get('max_results') else None
+
+    if query_string.get('date_from'):
+        date_from_str = query_string.get('date_from')
         date_from = datetime.strptime(date_from_str, "%Y-%m-%d").isoformat() + "Z"
     else:
         date_from = None
 
-    if event.get('date_to'):
-        date_to_str = event.get('date_to')
+    if query_string.get('date_to'):
+        date_to_str = query_string.get('date_to')
         date_to = datetime.strptime(date_to_str, "%Y-%m-%d").isoformat() + "Z"
     else:
         date_to = None

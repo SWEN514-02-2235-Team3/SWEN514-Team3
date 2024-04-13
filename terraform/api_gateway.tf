@@ -51,6 +51,21 @@ resource "aws_api_gateway_method" "get_sentiments_method" {
 
 }
 
+resource "aws_api_gateway_method" "get_sentiments_method" {
+  rest_api_id   = aws_api_gateway_rest_api.sa_api_gateway.id
+  resource_id   = aws_api_gateway_resource.sentiments_resource.id
+  http_method   = "GET"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.querystring.source"     = false,
+    "method.request.querystring.limit"      = false,
+    "method.request.querystring.date_range_from" = false,
+    "method.request.querystring.date_range_to"   = false
+  }
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
+
+}
 
 // API gateway deployment stage
 resource "aws_api_gateway_deployment" "sa_api_gateway_deployment" {
@@ -112,6 +127,22 @@ resource "aws_api_gateway_method_response" "get_sentiments_method_response_200" 
   }
 
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_integration.lambda ]
+}
+
+resource "aws_api_gateway_method" "youtube_live" {
+  rest_api_id   = aws_api_gateway_rest_api.sa_api_gateway.id
+  resource_id   = aws_api_gateway_resource.sentiments_resource.id # TO-DO
+  http_method   = "POST"
+  authorization = "NONE"
+
+  request_parameters = {
+    "method.request.querystring.region"     = false,
+    "method.request.querystring.max_results"      = false,
+    "method.request.querystring.date_from" = false,
+    "method.request.querystring.date_to"   = false
+  }
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
+
 }
 
 /*
