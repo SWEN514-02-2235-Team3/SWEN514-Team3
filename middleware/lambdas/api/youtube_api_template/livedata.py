@@ -61,12 +61,33 @@ def lambda_handler(event, context):
     for each in items:
 
         video_id = each['id']['videoId']
+        
         snippet = each['snippet']
         title = snippet['title']
         publish_date = snippet['publishedAt']
         description = snippet['description']
         comment = title + description
-        sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment'] # Generate Sentiment
+
+        try:
+        # Check if the item exists in the DynamoDB table
+        response = dynamodb.get_item(
+            TableName=table_name,
+            Key={
+                'id': {'S': id_to_check}  # Assuming 'id' is the primary key of type string
+            }
+        )
+        # If the item exists, return True
+        if 'Item' in response:
+            existing = False
+            sentiment = response['Item'].get('sentiment', {}).get('S')
+            if sentiment:
+                return sentiment
+            else:
+                return "Sentiment not found for ID: {}".format(id_to_check)
+        else:
+            existing = True
+            sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment'] # Generate Sentiment
+            print("Item Already Exists in Table")
 
         item = {
             'id': video_id,
@@ -76,21 +97,25 @@ def lambda_handler(event, context):
         }
         info.append(item)
 
-        # Generate a non-blocking UUID and insert record to dynamodb
-        for _ in range(3):
-            try:
-                dynamodb_client.put_item(
-                    TableName="SentAnalysisDataResults",
-                    Item={
-                        'id': {'S':video_id}, # set a random id
-                        'comment_date': {'S': publish_date},
-                        'comment': {'S': comment},
-                        'sentiment': {'S' : sentiment},
-                        'platform': {'S': 'youtube_live'},
-                    }
-                )  
-                break # break the loop 
-            except botocore.exceptions.ClientError: # dont process dataset
-                print(f"WARNING: Couldn't upload {item} to dynamodb...")
+        if not existing:
+            for _ in range(3):
+                try:
+                    put_record(video_id, publish_date, comment, sentiment)
+                    break # break the loop 
+                except botocore.exceptions.ClientError: # dont process dataset
+                    print(f"WARNING: Couldn't upload {item} to dynamodb...")
 
     return info
+
+def put_record(video_id, publish_date, comment, sentiment):
+    # Generate a non-blocking UUID and insert record to dynamodb
+    dynamodb_client.put_item(
+        TableName="SentAnalysisDataResults",
+        Item={
+            'id': {'S':video_id}, # set a random id
+            'comment_date': {'S': publish_date},
+            'comment': {'S': comment},
+            'sentiment': {'S' : sentiment},
+            'platform': {'S': 'youtube_live'},
+        }
+    ) 
