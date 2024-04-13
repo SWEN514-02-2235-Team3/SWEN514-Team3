@@ -36,7 +36,7 @@ resource "aws_api_gateway_resource" "sentiments_resource" {
 
 // API gateway deployment stage
 resource "aws_api_gateway_deployment" "sa_api_gateway_deployment" {
-  depends_on    = [aws_api_gateway_integration.lambda, aws_api_gateway_rest_api.sa_api_gateway]
+  depends_on    = [aws_api_gateway_integration.lambda, aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_integration.youtube_live, aws_api_gateway_integration.options_integration]
   rest_api_id   = aws_api_gateway_rest_api.sa_api_gateway.id
   stage_name    = "dev"
   description   = "Development Stage"
@@ -149,10 +149,10 @@ resource "aws_api_gateway_integration" "youtube_live" {
   uri                     = aws_lambda_function.get_sentiments_youtube.invoke_arn # Saranya's lambda function
   credentials             = aws_iam_role.sa_api_gateway_role.arn
   request_parameters = {
-    "integration.request.querystring.source"             = "method.request.querystring.source" # source = method.request.querystring.source
-    "integration.request.querystring.limit"              = "method.request.querystring.limit"
-    "integration.request.querystring.date_range_from"    = "method.request.querystring.date_range_from"
-    "integration.request.querystring.date_range_to"      = "method.request.querystring.date_range_to"
+    "integration.request.querystring.region"             = "method.request.querystring.region" # source = method.request.querystring.source
+    "integration.request.querystring.max_results"              = "method.request.querystring.max_results"
+    "integration.request.querystring.date_from"    = "method.request.querystring.date_from"
+    "integration.request.querystring.date_to"      = "method.request.querystring.date_to"
   }
 
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_method.youtube_live, aws_api_gateway_resource.sentiments_resource ]
@@ -214,7 +214,7 @@ resource "aws_iam_role" "sa_api_gateway_role" {
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 }
 
-// IAM Policy - Invoke Lambda
+// IAM Policy - Invoke Lambda on get_sentiments lambda
 resource "aws_iam_policy" "sa_api_gateway_lambda_policy" {
   name   = "api_gateway_lambda_policy"
   policy = jsonencode({
@@ -229,6 +229,21 @@ resource "aws_iam_policy" "sa_api_gateway_lambda_policy" {
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 }
 
+// IAM Policy - Invoke Lambda permission for live data lambda
+resource "aws_iam_policy" "sa_api_gateway_lambda_policy_youtube" {
+  name   = "api_gateway_lambda_policy_youtube"
+  policy = jsonencode({
+    "Version": "2012-10-17",
+    "Statement": [{
+      "Effect": "Allow",
+      "Action": "lambda:InvokeFunction",
+      "Resource": aws_lambda_function.get_sentiments_youtube.arn
+    }]
+  })
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
+}
+
 // Attach Policy to API Gateway
 resource "aws_iam_role_policy_attachment" "sa_api_gateway_lambda_policy_attachment" {
   policy_arn = aws_iam_policy.sa_api_gateway_lambda_policy.arn
@@ -236,6 +251,14 @@ resource "aws_iam_role_policy_attachment" "sa_api_gateway_lambda_policy_attachme
 
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 }
+
+resource "aws_iam_role_policy_attachment" "sa_api_gateway_lambda_policy_attachment" {
+  policy_arn = aws_iam_policy.sa_api_gateway_lambda_policy_youtube.arn
+  role       = aws_iam_role.sa_api_gateway_role.name
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
+}
+
 
 
 /**********************************

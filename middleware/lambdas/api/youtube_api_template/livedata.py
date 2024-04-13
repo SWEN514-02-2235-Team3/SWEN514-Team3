@@ -68,12 +68,11 @@ def lambda_handler(event, context):
         description = snippet['description']
         comment = title + description
 
-        try:
         # Check if the item exists in the DynamoDB table
-        response = dynamodb.get_item(
-            TableName=table_name,
+        response = dynamodb_client.get_item(
+            TableName="SentAnalysisDataResults",
             Key={
-                'id': {'S': id_to_check}  # Assuming 'id' is the primary key of type string
+                'id': {'S': video_id}  # Assuming 'id' is the primary key of type string
             }
         )
         # If the item exists, return True
@@ -83,7 +82,7 @@ def lambda_handler(event, context):
             if sentiment:
                 return sentiment
             else:
-                return "Sentiment not found for ID: {}".format(id_to_check)
+                return "Sentiment not found for ID: {}".format(video_id)
         else:
             existing = True
             sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment'] # Generate Sentiment
@@ -104,7 +103,7 @@ def lambda_handler(event, context):
                     break # break the loop 
                 except botocore.exceptions.ClientError: # dont process dataset
                     print(f"WARNING: Couldn't upload {item} to dynamodb...")
-
+                    
     return info
 
 def put_record(video_id, publish_date, comment, sentiment):
