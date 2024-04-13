@@ -12,7 +12,7 @@ resource "aws_lambda_function" "get_sentiments_youtube" {
   role          = aws_iam_role.lambda_s3_sentiments_youtube_role.arn
   handler       = "livedata.lambda_handler"
   runtime       = "python3.8"
-  timeout       = 60 # 1 minute timeout
+  timeout       = 600 # 10 minute timeout
   
   environment {
     variables = {

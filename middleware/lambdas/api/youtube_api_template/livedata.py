@@ -5,6 +5,7 @@ from datetime import datetime
 import boto3
 import botocore.exceptions
 from dateutil.parser import parse
+import random
 
 # Your API key
 api_key = "AIzaSyBwar2tkCtOhYkkQngj6qTZuvSnyU6GuM0"
@@ -28,11 +29,13 @@ def lambda_handler(event, context):
     date_to = None
     
     generated_sentiments = 0
+    videos_analyzed = 0
     
     try:
         max_results = int(query_string.get("max_results"))
+        if max_results > 10: max_results = 10
     except: 
-        max_results = 10
+        max_results = 1
     try:
         region = query_string.get("region").strip()
     except: pass
@@ -60,20 +63,21 @@ def lambda_handler(event, context):
         regionCode=region,
         type="video",
         videoType="any",
-        maxResults=max_results,
+        maxResults=100,
         publishedBefore=date_to,
         publishedAfter=date_from
     )
     response = request.execute()
 
     # Parse Response
-    items = response['items']
+    items = sorted(response['items'], key=lambda x: random.random())[:max_results]
     info = []
     region = {'region' : response['regionCode']}
     info.append(region)
 
     for each in items:
-        video_id = each['id']['videoId']        
+        video_id = each['id']['videoId']
+        videos_analyzed+=1;        
         
         # Check if the item exists in the DynamoDB table
         response = dynamodb_client.get_item(
@@ -87,6 +91,7 @@ def lambda_handler(event, context):
             sentiment = response['Item'].get('sentiment', {}).get('S')
             if sentiment: 
                 print("Youtube comment already processed")
+                videos_analyzed-=1
                 print(response['Item'])
                 continue # go onto the next item if we've already processed that youtube url
         else:
@@ -117,7 +122,7 @@ def lambda_handler(event, context):
                         'publish_date': date,
                         'sentiment': sentiment
                     }
-                    print(item)
+                    #print(item)
                     
                     for _ in range(3):
                         try:
@@ -136,7 +141,9 @@ def lambda_handler(event, context):
             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
         },
         'body': json.dumps({
-            'sentiments_generated': generated_sentiments
+            'videos_found': len(items),
+            'videos_analyzed': videos_analyzed,
+            'comments_analyzed': generated_sentiments
         })
     }
 
