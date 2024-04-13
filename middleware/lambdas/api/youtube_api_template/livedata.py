@@ -31,7 +31,8 @@ def lambda_handler(event, context):
     
     try:
         max_results = int(query_string.get("max_results"))
-    except: pass
+    except: 
+        max_results = 10
     try:
         region = query_string.get("region").strip()
     except: pass
@@ -91,39 +92,42 @@ def lambda_handler(event, context):
         else:
             print("PROCESSING YOUTUBE COMMENT")        
             # Initial request to retrieve comment threads
-            request = youtube.commentThreads().list(
-                part="snippet",
-                videoId=video_id,
-                maxResults=100,  # Maximum number of results per page (adjust as needed)
-                textFormat="plainText"
-            )
-            response = request.execute()
-            for item in response['items']:
-                comment = item['snippet']['topLevelComment']['snippet']['textDisplay']
-                comment_date = item['snippet']['topLevelComment']['snippet']['publishedAt']
-                date = None
-                try: # parse date
-                    date = parse(comment_date, fuzzy=True)
-                    date = str(date)[:10]
-                except: continue # skip if its not a valid date
-                
-                sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment'] # Generate Sentiment
-                
-                item = {
-                    'id': video_id,
-                    'comment': comment,
-                    'publish_date': date,
-                    'sentiment': sentiment
-                }
-                print(item)
-                
-                for _ in range(3):
-                    try:
-                        put_record(video_id, date, comment, sentiment)
-                        generated_sentiments+=1
-                        break # break the loop 
-                    except botocore.exceptions.ClientError: # dont process dataset
-                        print(f"WARNING: Couldn't upload {item} to dynamodb...")
+            try:
+                request = youtube.commentThreads().list(
+                    part="snippet",
+                    videoId=video_id,
+                    maxResults=100, 
+                    textFormat="plainText"
+                )
+                response = request.execute()
+                for item in response['items']:
+                    comment = item['snippet']['topLevelComment']['snippet']['textDisplay']
+                    comment_date = item['snippet']['topLevelComment']['snippet']['publishedAt']
+                    date = None
+                    try: # parse date
+                        date = parse(comment_date, fuzzy=True)
+                        date = str(date)[:10]
+                    except: continue # skip if its not a valid date
+                    
+                    sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment'] # Generate Sentiment
+                    
+                    item = {
+                        'id': video_id,
+                        'comment': comment,
+                        'publish_date': date,
+                        'sentiment': sentiment
+                    }
+                    print(item)
+                    
+                    for _ in range(3):
+                        try:
+                            put_record(video_id, date, comment, sentiment)
+                            generated_sentiments+=1
+                            break # break the loop 
+                        except botocore.exceptions.ClientError: # dont process dataset
+                            print(f"WARNING: Couldn't upload {item} to dynamodb...")
+            except:
+                print("Comments disabled on yt video")
     return {
         'statusCode': 200,
         'headers': {
@@ -131,9 +135,9 @@ def lambda_handler(event, context):
             "Access-Control-Allow-Origin": "*",# Required for CORS support to work
             'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
         },
-        'body': {
+        'body': json.dumps({
             'sentiments_generated': generated_sentiments
-        }
+        })
     }
 
 def put_record(video_id, publish_date, comment, sentiment):
