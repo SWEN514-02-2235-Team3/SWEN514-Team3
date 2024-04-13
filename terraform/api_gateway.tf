@@ -51,22 +51,6 @@ resource "aws_api_gateway_method" "get_sentiments_method" {
 
 }
 
-resource "aws_api_gateway_method" "get_sentiments_method" {
-  rest_api_id   = aws_api_gateway_rest_api.sa_api_gateway.id
-  resource_id   = aws_api_gateway_resource.sentiments_resource.id
-  http_method   = "GET"
-  authorization = "NONE"
-
-  request_parameters = {
-    "method.request.querystring.source"     = false,
-    "method.request.querystring.limit"      = false,
-    "method.request.querystring.date_range_from" = false,
-    "method.request.querystring.date_range_to"   = false
-  }
-  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
-
-}
-
 // API gateway deployment stage
 resource "aws_api_gateway_deployment" "sa_api_gateway_deployment" {
   depends_on    = [aws_api_gateway_integration.lambda, aws_api_gateway_rest_api.sa_api_gateway]
@@ -129,6 +113,10 @@ resource "aws_api_gateway_method_response" "get_sentiments_method_response_200" 
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_integration.lambda ]
 }
 
+/////////////////////////////////////////////////
+//////////// SENTIMENTS POST
+/////////////////////////////////////////////////
+
 resource "aws_api_gateway_method" "youtube_live" {
   rest_api_id   = aws_api_gateway_rest_api.sa_api_gateway.id
   resource_id   = aws_api_gateway_resource.sentiments_resource.id # TO-DO
@@ -144,6 +132,63 @@ resource "aws_api_gateway_method" "youtube_live" {
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 
 }
+
+
+// sentiments GET - Invoke Lambda function (integration request)
+resource "aws_api_gateway_integration" "youtube_live" {
+  rest_api_id             = aws_api_gateway_rest_api.sa_api_gateway.id
+  resource_id             = aws_api_gateway_resource.sentiments_resource.id
+  http_method             = aws_api_gateway_method.get_sentiments_method.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY" 
+
+  uri                     = aws_lambda_function.get_sentiments.invoke_arn # Saranya's lambda function
+  credentials             = aws_iam_role.sa_api_gateway_role.arn
+  request_parameters = {
+    "integration.request.querystring.source"             = "method.request.querystring.source" # source = method.request.querystring.source
+    "integration.request.querystring.limit"              = "method.request.querystring.limit"
+    "integration.request.querystring.date_range_from"    = "method.request.querystring.date_range_from"
+    "integration.request.querystring.date_range_to"      = "method.request.querystring.date_range_to"
+  }
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_method.youtube_live, aws_api_gateway_resource.sentiments_resource ]
+}
+
+// sentiments POST - Integration response
+resource "aws_api_gateway_integration_response" "youtube_live" {
+  rest_api_id          = aws_api_gateway_rest_api.sa_api_gateway.id
+  resource_id          = aws_api_gateway_resource.sentiments_resource.id
+  http_method          = aws_api_gateway_method.youtube_live.http_method
+  status_code          = "200"
+  response_templates = {
+    "application/json" = ""
+  }
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_integration.youtube_live ]
+}
+
+// sentiments POST - Method response
+resource "aws_api_gateway_method_response" "youtube_live" {
+  rest_api_id = aws_api_gateway_rest_api.sa_api_gateway.id
+  resource_id = aws_api_gateway_resource.sentiments_resource.id
+  http_method          = aws_api_gateway_method.youtube_live.http_method
+  status_code = "200"
+
+  response_models = {
+    "application/json" = "Empty"
+  }
+
+  response_parameters = {
+    "method.response.header.Content-Type" = true,
+    "method.response.header.Access-Control-Allow-Origin" = true
+  }
+
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_integration.youtube_live ]
+}
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
     API GATEWAY PERMISSIONS
