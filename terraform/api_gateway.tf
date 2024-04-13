@@ -252,7 +252,7 @@ resource "aws_iam_role_policy_attachment" "sa_api_gateway_lambda_policy_attachme
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 }
 
-resource "aws_iam_role_policy_attachment" "sa_api_gateway_lambda_policy_attachment" {
+resource "aws_iam_role_policy_attachment" "sa_api_gateway_lambda_policy_attachment_youtube" {
   policy_arn = aws_iam_policy.sa_api_gateway_lambda_policy_youtube.arn
   role       = aws_iam_role.sa_api_gateway_role.name
 
