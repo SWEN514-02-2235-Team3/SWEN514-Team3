@@ -1,7 +1,7 @@
 # package up python code for sentiments
 data "archive_file" "lambda_s3_sentiments_code" {
   type        = "zip"
-  source_dir  = "../middleware/lambdas/api"           # since middleware/ is within the root repo 
+  source_dir  = "../middleware/lambdas/api/get_sentiments"           # since middleware/ is within the root repo 
   output_path = "../terraform_temp/sentiments_apis.zip" # store zip locally within a temp directory
 }
 
