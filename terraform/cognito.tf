@@ -11,8 +11,12 @@ resource "aws_cognito_user_pool" "my_user_pool" {
     # require_uppercase = true
     // Add at another point for more security ?
   }
-
-  
+    # environment_variables = {
+    #     ENV = "dev"
+    #     USER_POOL_ID = "${}" # API Gateway URL
+        
+    # }
+    
   
 }
 resource "aws_cognito_user_pool_client" "my_app_client" {
