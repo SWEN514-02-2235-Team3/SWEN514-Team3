@@ -1,6 +1,9 @@
 import React from "react";
 import WordCloud from "react-d3-cloud"; // Adjusted import for default export
 import * as d3 from "d3";
+import ReactWordcloud from 'react-wordcloud';
+import { Typography } from "@mui/material";
+import { TagCloud } from 'react-tagcloud'
 
 const WordCloudComponent = ({ data }) => {
   const processData = (data) => {
@@ -17,22 +20,41 @@ const WordCloudComponent = ({ data }) => {
       });
     });
     return Object.keys(wordsMap).map((word) => ({
-      text: word,
-      value: wordsMap[word],
+      // text: word,            // ReactWordcloud
+      // value: wordsMap[word], // ReactWordcloud
+      value: word,              // TagCloud
+      count: wordsMap[word],    // TagCloud
     }));
   };
 
   const wordData = processData(data);
 
-  const fontSizeMapper = (word) => Math.log2(word.value) * 5; // Adjust the size scaling as needed
+  const options = {
+    rotations: 0,
+    rotationAngles: [-90, 0],
+    fontSizes: [50, 300],
+  };
 
+  const callbacks = {
+    getWordTooltip: word => `${word.text} (${word.value})`,
+  }
+
+  const size = [1100, 500];
   return (
-    <WordCloud
-      data={wordData}
-      fontSizeMapper={fontSizeMapper}
-      width={60}
-      height={40}
+    <>
+    <Typography variant="h4">Word Cloud</Typography>
+    {/* <ReactWordcloud
+      words={wordData}
+      callbacks={callbacks}
+      size={size}
+      options={options}
+    /> */}
+    <TagCloud
+      tags={wordData}
+      minSize={25}
+      maxSize={150}
     />
+    </>
   );
 };
 

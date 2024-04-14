@@ -14,7 +14,14 @@ import {
   FormControl,
   FormLabel,
   CircularProgress,
+  AppBar,
+  Toolbar,
+  Grid,
+  Divider,
+  Stack,
+  useThemeProps,
 } from "@mui/material";
+import MenuIcon from '@mui/icons-material/Menu';
 import WordCloudComponent from "./WordCloudComponent";
 import BarChartComponent from "./BarChartComponent";
 import PieChartComponent from "./PieChartComponent";
@@ -47,6 +54,11 @@ const FormComponent = () => {
   // Default limit number
   const [limit, setLimit] = useState(5);
 
+  // START LIVE DATASETS VARIABLES
+  const [liveLimit, setLiveLimit] = useState(1);
+  const [liveStatus, setLiveStatus] = useState("Waiting for datasets to be generated...");
+  // END LIVE DATASETS VARIABLES
+
   const [platform, setPlatforms] = useState("");
 
   const [dateRange, setDateRange] = useState({
@@ -57,6 +69,7 @@ const FormComponent = () => {
   });
 
   const [loading, setLoading] = useState(0);
+  const [liveDatasetsLoading, setLiveDatasetsLoading] = useState(0);
 
   const handlePlatformChange = (event) => {
     setPlatforms(event.target.value);
@@ -107,8 +120,6 @@ const FormComponent = () => {
 
       .then((data) => {
         setAnalysisData(data);
-        setDisplayMode("wordCloud");
-        console.log(data);
       })
 
       .catch((error) => {
@@ -120,174 +131,211 @@ const FormComponent = () => {
       });
   };
 
+  const generate_live_datasets = async () => {
+    const invokeURL = process.env.REACT_APP_API_URL; // for local development this is available on the frontend/.env file from deploying terraform infra; available as environment variable for amplify
+    setLiveDatasetsLoading(1);
+    // Define query string parameters
+    const queryParams = new URLSearchParams({
+      max_results: liveLimit,
+      // date_from: "2020-01-01",
+      // date_to: "2024-04-13"
+    });
+
+    // Construct the full URL with query string parameters
+    const urlWithParams = `${invokeURL}/sentiments?${queryParams.toString()}`;
+
+    // Define the headers
+    // Headers do not work atm
+
+    // Use fetch to make the POST request
+    fetch(urlWithParams, {
+      method: "POST",
+    })
+      .then((response) => response.json())
+
+      .then((data) => {
+          // Parse the response object
+          const { videos_found, videos_analyzed, comments_analyzed } = data;
+
+          // Construct the status string
+          const statusString = `Generated ${comments_analyzed} sentiments (comments) from ${videos_analyzed} videos.`;
+          console.log(data);
+          // Set the status string
+          setLiveStatus(statusString);
+
+      })
+
+      .catch((error) => {
+        setLiveStatus(error.message || "Error occurred while fetching data.");
+      })
+
+      .finally(() => {
+        setLiveDatasetsLoading(0);
+      });
+  };
+
   return (
     <ThemeProvider theme={theme}>
-      <Box
-        sx={{
-          minHeight: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Container component="main" maxWidth="sm" sx={{ p: 3 }}>
-          <Typography component="h1" variant="h3" color="primary" gutterBottom>
+      <AppBar position="static" color="primary">
+        <Toolbar>
+          <IconButton
+            size="large"
+            edge="start"
+            color="inherit"
+            aria-label="menu"
+            sx={{ mr: 2 }}
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
             Sentiment Analysis
           </Typography>
-          {displayMode === "form" && (
-            <>
-              {step === 1 && (
-                <FormControl component="fieldset">
-                  <FormLabel component="legend">Choose your platform</FormLabel>
-                  <RadioGroup
-                    aria-label="platform"
-                    name="platform"
-                    value={platform}
-                    onChange={handlePlatformChange}
-                  >
-                    <FormControlLabel
-                      value="youtube"
-                      control={<Radio />}
-                      label="YouTube"
-                    />
-                    <FormControlLabel
-                      value="reddit"
-                      control={<Radio />}
-                      label="Reddit"
-                    />
-                    <FormControlLabel
-                      value="twitter"
-                      control={<Radio />}
-                      label="Twitter"
-                    />
-                  </RadioGroup>
-                </FormControl>
-              )}
-              {step === 2 && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    width: "100%",
-                    mt: 2,
-                  }}
-                >
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DatePicker
-                      label="Start Date"
-                      value={dateRange.start}
-                      onChange={(newValue) => {
-                        handleDateChange("start", newValue);
-                      }}
-                      renderInput={(params) => <TextField {...params} />}
-                    />
-                    <DatePicker
-                      label="End Date"
-                      value={dateRange.end}
-                      onChange={(newValue) => {
-                        handleDateChange("end", newValue);
-                      }}
-                      renderInput={(params) => <TextField {...params} />}
-                    />
-                  </LocalizationProvider>
-                </Box>
-              )}
-              {step === 3 && (
-                <Box
-                  sx={{
-                    mt: 2,
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <FormLabel component="legend">
-                    Choose a number of datapoints
-                  </FormLabel>
-                  <TextField
-                    label="Limit"
-                    type="number"
-                    variant="outlined"
-                    value={limit}
-                    onChange={(e) => setLimit(e.target.value)}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                    margin="normal"
-                  />
-                </Box>
-              )}
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  width: "100%",
-                  mt: 2,
-                }}
+          <Button color="inherit">Login</Button>
+        </Toolbar>
+      </AppBar>
+      <Grid container direction="row" spacing={11} justifyContent="flex-start">
+      <Grid id="formSelectOptions" item m={3}>
+        <Typography variant="h4"  sx={{ flexGrow: 1 }}>Analysis Options</Typography>
+      <Box>
+      <FormControl component="fieldset">
+              <FormLabel>Choose your platform</FormLabel>
+              <RadioGroup
+                aria-label="platform"
+                name="platform"
+                value={platform}
+                onChange={handlePlatformChange}
               >
-                {step > 1 ? (
-                  <IconButton onClick={handleBack} color="primary">
-                    <ArrowBackIcon />
-                  </IconButton>
-                ) : (
-                  // This empty div acts as a placeholder to keep the "next" button aligned to the right
-                  <div />
-                )}
-                {/* Empty div here to maintain spacing if necessary */}
-                <div style={{ flexGrow: 1 }} />
-                {step < totalSteps ? (
-                  <IconButton onClick={handleNext} color="primary">
-                    <ArrowForwardIcon />
-                  </IconButton>
-                ) : (
-                  // Empty div for allignment
-                  <div />
-                )}
-              </Box>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={get_sentiments}
-                fullWidth
-                sx={{ mt: 2 }}
-              >
-                {loading ? (
-                  <CircularProgress
-                    size={25}
-                    sx={{ color: "white" }}
-                    thickness={5}
-                  />
-                ) : (
-                  <span>Analyze</span>
-                )}
-              </Button>
-            </>
-          )}
-          {displayMode === "wordCloud" && analysisData && (
-            <WordCloudComponent data={analysisData} />
-          )}
-          {displayMode === "barChart" && analysisData && (
-            <BarChartComponent data={analysisData} />
-          )}
-          {displayMode === "pieChart" && analysisData && (
-            <PieChartComponent data={analysisData} />
-          )}
-          {analysisData && (
-            <Box>
-              <Button onClick={() => setDisplayMode("wordCloud")}>
-                Word Cloud
-              </Button>
-              <Button onClick={() => setDisplayMode("barChart")}>
-                Bar Chart
-              </Button>
-              <Button onClick={() => setDisplayMode("pieChart")}>
-                Pie Chart
-              </Button>
-              <Button onClick={handleReturn}>Return</Button>
-            </Box>
-          )}
-        </Container>
+                <FormControlLabel
+                  value="youtube"
+                  control={<Radio />}
+                  label="YouTube"
+                />
+                <FormControlLabel
+                  value="reddit"
+                  control={<Radio />}
+                  label="Reddit"
+                />
+                <FormControlLabel
+                  value="twitter"
+                  control={<Radio />}
+                  label="Twitter"
+                />
+                <FormControlLabel
+                  value="youtube_live"
+                  control={<Radio />}
+                  label="YouTube (Live Datasets)"
+                />
+                {platform == 'youtube_live' && 
+                  <Box>
+                    <Typography variant="h6">YouTube Live Datasets Options </Typography>
+                    <TextField
+                        label="Videos to Analyze (Max 10)"
+                        type="number"
+                        variant="outlined"
+                        value={liveLimit}
+                        onChange={(e) => setLiveLimit(e.target.value)}
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                        margin="normal"
+                      />
+                      <Box/>
+                      <Button
+                            variant="contained"
+                            color="primary"
+                            onClick={generate_live_datasets}
+                            fullWidth
+                            sx={{ mt: 2, width: '200px', }}
+                          >
+                            {liveDatasetsLoading ? (
+                              <CircularProgress
+                                size={25}
+                                sx={{ color: "white" }}
+                                thickness={5}
+                              />
+                            ) : (
+                              <span>Generate Datasets</span>
+                            )}
+                          </Button>
+                          <Box sx={{ height: 10 }} />
+                          <Typography>{liveStatus}</Typography>
+                  </Box>
+                }
+              </RadioGroup>
+            </FormControl>
       </Box>
+      <Divider sx={{ my: '20px' }} />
+      <Box>
+      <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <FormLabel>Choose a date range</FormLabel>
+                <Box  sx={{ my: '20px' }}></Box>
+                <DatePicker
+                  label="Start Date"
+                  value={dateRange.start}
+                  onChange={(newValue) => {
+                    handleDateChange("start", newValue);
+                  }}
+                  renderInput={(params) => <TextField {...params} />}
+                  sx={{ width: '170px' }}
+                />
+                <DatePicker
+                  label="End Date"
+                  value={dateRange.end}
+                  onChange={(newValue) => {
+                    handleDateChange("end", newValue);
+                  }}
+                  renderInput={(params) => <TextField {...params} />}
+                  sx={{ width: '170px' }}
+                />
+              </LocalizationProvider>
+      </Box>
+      <Divider sx={{ my: '20px' }} />
+      <Box>
+      <FormLabel component="legend">Choose a number of datapoints </FormLabel>
+        <TextField
+          label="Limit"
+          type="number"
+          variant="outlined"
+          value={limit}
+          onChange={(e) => setLimit(e.target.value)}
+          InputLabelProps={{
+            shrink: true,
+          }}
+          margin="normal"
+          sx={{ width: '170px' }}
+        />
+      </Box>
+      <Divider sx={{ my: '20px' }} />
+      <Box>
+      <Button
+            variant="contained"
+            color="primary"
+            onClick={get_sentiments}
+            fullWidth
+            sx={{ mt: 2 }}
+          >
+            {loading ? (
+              <CircularProgress
+                size={25}
+                sx={{ color: "white" }}
+                thickness={5}
+              />
+            ) : (
+              <span>Analyze</span>
+            )}
+          </Button>
+      </Box>
+      </Grid>
+      <Grid id="visualizations" item xs={7}>
+          {analysisData && 
+              <Box>
+                <BarChartComponent data={analysisData} />
+                <PieChartComponent data={analysisData} />
+                <WordCloudComponent data={analysisData} />
+              </Box>
+            }
+      </Grid>
+    </Grid>
     </ThemeProvider>
   );
 };
