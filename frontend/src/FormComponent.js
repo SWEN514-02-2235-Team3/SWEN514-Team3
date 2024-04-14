@@ -86,13 +86,13 @@ const FormComponent = () => {
         alert("Sign up successful!");
       } else {
         console.log(`Username: ${username}, Password ${password}`);
-        const user = await signIn(username, password);
-        setUser(user);
+        await signIn(username, password);
+        setUser(getCurrentUser());
         console.log("Sign in successful: ", user);
         alert("Sign in successful!");
       }
     } catch (error) {
-      alert("Error: " + error.message);
+      alert("Error: " + error);
     }
 
     handleModalClose();

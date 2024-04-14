@@ -1,17 +1,14 @@
-
-
 resource "aws_cognito_user_pool" "main" {
   name = "SA_UserPool"
 
   password_policy {
-    minimum_length    = 8
-    require_numbers   = true
-    require_symbols   = true
-    require_uppercase = true
-    require_lowercase = true
+    minimum_length    = 6
+
   }
 
-
+  lambda_config {
+    pre_sign_up = aws_lambda_function.cognito_pre_signup.arn
+  }
   schema {
     attribute_data_type      = "String"
     name                     = "email"
@@ -22,9 +19,19 @@ resource "aws_cognito_user_pool" "main" {
       max_length = 50
     }
   }
+    auto_verified_attributes = ["email"]
+
+  depends_on = [aws_lambda_function.cognito_pre_signup]
+}
 
 
-  auto_verified_attributes = ["email"]
+
+resource "aws_lambda_permission" "allow_cognito" {
+  statement_id  = "AllowCognitoInvocation"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.cognito_pre_signup.function_name
+  principal     = "cognito-idp.amazonaws.com"
+  source_arn    = aws_cognito_user_pool.main.arn
 }
 
 resource "aws_cognito_user_pool_client" "main" {
