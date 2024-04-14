@@ -42,11 +42,11 @@ const theme = createTheme({
 });
 
 const FormComponent = () => {
-  const [step, setStep] = useState(1);
-  const totalSteps = 3;
+  // const [step, setStep] = useState(1);
+  // const totalSteps = 3;
 
-  // state display to handle which chart to show
-  const [displayMode, setDisplayMode] = useState("form");
+  // // state display to handle which chart to show
+  // const [displayMode, setDisplayMode] = useState("form");
 
   // data received from API
   const [analysisData, setAnalysisData] = useState(null);
@@ -75,23 +75,23 @@ const FormComponent = () => {
     setPlatforms(event.target.value);
   };
 
-  const handleNext = () => {
-    if (step < totalSteps) {
-      setStep((prevStep) => prevStep + 1);
-    }
-  };
+  // const handleNext = () => {
+  //   if (step < totalSteps) {
+  //     setStep((prevStep) => prevStep + 1);
+  //   }
+  // };
 
-  const handleReturn = () => {
-    setAnalysisData(null);
-    setDisplayMode("form");
-    setStep(1);
-  };
+  // const handleReturn = () => {
+  //   setAnalysisData(null);
+  //   setDisplayMode("form");
+  //   setStep(1);
+  // };
 
-  const handleBack = () => {
-    if (step > 1) {
-      setStep((prevStep) => prevStep - 1);
-    }
-  };
+  // const handleBack = () => {
+  //   if (step > 1) {
+  //     setStep((prevStep) => prevStep - 1);
+  //   }
+  // };
 
   const handleDateChange = (name, value) => {
     setDateRange({ ...dateRange, [name]: value });
@@ -119,6 +119,7 @@ const FormComponent = () => {
       .then((response) => response.json())
 
       .then((data) => {
+        console.log(data);
         setAnalysisData(data);
       })
 
@@ -156,10 +157,13 @@ const FormComponent = () => {
       .then((data) => {
           // Parse the response object
           const { videos_found, videos_analyzed, comments_analyzed } = data;
-
+          const statusString = '';
           // Construct the status string
-          const statusString = `Generated ${comments_analyzed} sentiments (comments) from ${videos_analyzed} videos.`;
-          console.log(data);
+          if (!comments_analyzed) {
+            statusString = `Could not find any comments across ${videos_analyzed} analyzed videos (${videos_found} total found). Retry again to generate more datasets.`
+          } else {
+            statusString = `Generated ${comments_analyzed} sentiments (comments) from ${videos_analyzed} videos (${videos_found} total found).`;
+          }
           // Set the status string
           setLiveStatus(statusString);
 
