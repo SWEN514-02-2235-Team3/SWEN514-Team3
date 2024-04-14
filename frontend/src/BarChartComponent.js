@@ -3,7 +3,8 @@ import { BarChart } from '@mui/x-charts/BarChart';
 import { Typography } from '@mui/material';
 
 const BarChartComponent = ({ data }) => {
-  // Function to parse comment_date and extract month/year
+
+  // Parse comment_date and extract month/year
   const parseDate = (dateString) => {
     const date = new Date(dateString);
     const month = date.toLocaleString('default', { month: 'short' });
@@ -11,7 +12,7 @@ const BarChartComponent = ({ data }) => {
     return `${month}-${year}`;
   };
 
-  // Function to group sentiments by month/year and count occurrences
+  // Group sentiments by month/year and count occurrences
   const groupSentimentsByDate = () => {
     const sentimentsByDate = {};
     data.forEach(item => {

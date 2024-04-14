@@ -31,6 +31,7 @@ import { DatePicker } from "@mui/x-date-pickers";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
+import LineChartComponent from "./LineChartComponent";
 
 const theme = createTheme({
   palette: {
@@ -334,6 +335,7 @@ const FormComponent = () => {
           {analysisData && 
               <Box>
                 <BarChartComponent data={analysisData} />
+                <LineChartComponent data={analysisData} />
                 <PieChartComponent data={analysisData} />
                 <WordCloudComponent data={analysisData} />
               </Box>
