@@ -53,16 +53,73 @@ const WordCloudComponent = ({ data }) => {
     'tit', 'tits', 'whore', 'sucker', 'suckers', 'wank', 'wanks', 'wanked', 'wanking',
   ];
 
+  function word(value, sentiment) {
+    const wordObject = {
+      value: value,
+      count: 1,
+      positive: 0,
+      neutral: 0,
+      negative: 0,
+      mixed: 0,
+      dominantSentiment: "neutral" // Default value
+    };
+  
+    if (sentiment === "positive") {
+      wordObject.positive = 1;
+    } else if (sentiment === "neutral") {
+      wordObject.neutral = 1;
+    } else if (sentiment === "negative") {
+      wordObject.negative = 1;
+    } else if (sentiment === "mixed") {
+      wordObject.mixed = 1;
+    }
+  
+    const maxSentiment = Math.max(wordObject.positive, wordObject.neutral, wordObject.negative, wordObject.mixed);
+    if (maxSentiment === wordObject.positive) {
+      wordObject.dominantSentiment = "positive";
+    } else if (maxSentiment === wordObject.negative) {
+      wordObject.dominantSentiment = "negative";
+    } else if (maxSentiment === wordObject.mixed) {
+      wordObject.dominantSentiment = "mixed";
+    }
+  
+    return wordObject;
+  }
+
+  function incrementWord(wordObject, sentiment) {
+    wordObject.count += 1;
+    
+    if (sentiment === "positive") {
+      wordObject.positive += 1;
+    } else if (sentiment === "neutral") {
+      wordObject.neutral += 1;
+    } else if (sentiment === "negative") {
+      wordObject.negative += 1;
+    } else if (sentiment === "mixed") {
+      wordObject.mixed += 1;
+    }
+
+    const maxSentiment = Math.max(wordObject.positive, wordObject.neutral, wordObject.negative, wordObject.mixed);
+    if (maxSentiment === wordObject.positive) {
+      wordObject.dominantSentiment = "positive";
+    } else if (maxSentiment === wordObject.negative) {
+      wordObject.dominantSentiment = "negative";
+    } else if (maxSentiment === wordObject.mixed) {
+      wordObject.dominantSentiment = "mixed";
+    }
+  }
+
   const processData = (data) => {
     let wordsMap = {};
     data.forEach((item) => {
+      const sentiment = item.sentiment
       const words = item.comment.split(/\s+/);
       words.forEach((word) => {
-        //ewww regex stuff for normalizing everything.
+        // regex to normalize words
         const cleanedWord = word.replace(/[^a-zA-Z ]/g, "").toLowerCase();
+        
         if (cleanedWord.length > 3 && cleanedWord.length < 15
           && !blacklist.includes(cleanedWord)) {
-          // Only consider words longer than 3 characters - TODO, update this to a more comprehensive filtering method
           wordsMap[cleanedWord] = (wordsMap[cleanedWord] || 0) + 1;
         }
       });
@@ -74,6 +131,7 @@ const WordCloudComponent = ({ data }) => {
     return topWords.map((word) => ({
       value: word,
       count: wordsMap[word],
+      // color: word.length > 7 ? 'red' : 'green'
     }));
   };
 
