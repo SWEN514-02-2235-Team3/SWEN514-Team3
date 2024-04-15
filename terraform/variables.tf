@@ -40,3 +40,20 @@ resource "random_string" "bucket_suffix" {
   length  = 8
   special = false
 }
+
+
+variable "lambda_function_name" {
+  default = "cognitoAutoConfirmUser"
+}
+
+variable "lambda_function_path" {
+  default = "../terraform_temp/lambda_function_payload.zip"
+}
+
+variable "lambda_handler" {
+  default = "index.handler"
+}
+
+variable "lambda_runtime" {
+  default = "nodejs12.x"
+}
