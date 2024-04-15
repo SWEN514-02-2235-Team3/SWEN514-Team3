@@ -327,18 +327,18 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
 }
 
 # Generate .env to store API Gateway URL
-data "template_file" "env_template" {
-  template = file("env_template.tpl")
+# data "template_file" "env_template" {
+#   template = file("env_template.tpl")
 
-  vars = {
-    api_gateway_url = aws_api_gateway_deployment.sa_api_gateway_deployment.invoke_url
-  }
+#   vars = {
+#     api_gateway_url = aws_api_gateway_deployment.sa_api_gateway_deployment.invoke_url
+#   }
 
-  depends_on = [ aws_api_gateway_deployment.sa_api_gateway_deployment ]
-}
+#   depends_on = [ aws_api_gateway_deployment.sa_api_gateway_deployment ]
+# }
 
-resource "local_file" "env_file" {
-  content  = data.template_file.env_template.rendered
-  filename = "../frontend/.env"
-  depends_on = [ data.template_file.env_template, aws_api_gateway_deployment.sa_api_gateway_deployment ]
-}
+# resource "local_file" "env_file" {
+#   content  = data.template_file.env_template.rendered
+#   filename = "../frontend/.env"
+#   depends_on = [ data.template_file.env_template, aws_api_gateway_deployment.sa_api_gateway_deployment ]
+# }
