@@ -53,9 +53,16 @@ const FormComponent = () => {
   // const [displayMode, setDisplayMode] = useState("form");
 
   // data received from API
+  const [analysisData, setAnalysisData] = useState(null);
+  const [analyzedPlatform, setAnalyzedPlatform] = useState({
+        platform: null,
+        num_comments: 0,
+      }
+    );
+  const [analyzeError, setAnalyzeError] = useState(null);
 
   // Default limit number
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(null);
 
   //sidebar toggler
   const [isFirstLoad, setIsFirstLoad] = useState(true);
@@ -84,13 +91,13 @@ const FormComponent = () => {
   const [dateRange, setDateRange] = useState({
     // TODO - Grey out dates that are not available to input
     start: dayjs("2020-10-01"), // default start: October 1, 2020
-    end: dayjs("2023-11-30"), // default end: November 30, 2023
+    end: dayjs(), // default end: November 30, 2023
   });
 
   const setDatesDefault = () => {
     setDateRange({
       start: dayjs("2020-10-01"), // October 1, 2020
-      end: dayjs("2023-11-30"), // November 30, 2023
+      end: dayjs(), // November 30, 2023
     });
   };
   
@@ -164,10 +171,16 @@ const FormComponent = () => {
       .then((data) => {
         console.log(data);
         setAnalysisData(data);
+        setAnalyzedPlatform(platform);
+        setAnalyzedPlatform({
+          platform: platform,
+          num_comments: data.length,
+        });
       })
 
       .catch((error) => {
         console.error("Error fetching data:", error);
+        setAnalyzeError("Error fetching data:", error);
       })
 
       .finally(() => {
@@ -381,6 +394,7 @@ const FormComponent = () => {
                 <Box  sx={{ my: '20px' }}></Box>
                 <DatePicker
                   label="Start Date"
+                  disabled={!platform}
                   value={dateRange.start}
                   onChange={(newValue) => {
                     handleDateChange("start", newValue);
@@ -390,6 +404,7 @@ const FormComponent = () => {
                 />
                 <DatePicker
                   label="End Date"
+                  disabled={!platform}
                   value={dateRange.end}
                   onChange={(newValue) => {
                     handleDateChange("end", newValue);
@@ -401,6 +416,7 @@ const FormComponent = () => {
               <Button
                 variant="contained"
                 color="primary"
+                disabled={!platform}
                 onClick={() => removeDates()}
                 sx={{ mt: 1, mx:1 }}
               >
@@ -410,6 +426,7 @@ const FormComponent = () => {
               <Button
                 variant="contained"
                 color="primary"
+                disabled={!platform}
                 onClick={() => setDatesDefault()}
                 sx={{ mt: 2}}
               >
@@ -435,6 +452,7 @@ const FormComponent = () => {
         <TextField
           label="Limit"
           type="number"
+          disabled={!platform}
           variant="outlined"
           value={limit}
           onChange={(e) => setLimit(e.target.value)}
@@ -447,6 +465,7 @@ const FormComponent = () => {
         <Button
           variant="contained"
           color="primary"
+          disabled={!platform}
           onClick={() => 
             setLimit('')
             
@@ -462,6 +481,7 @@ const FormComponent = () => {
             variant="contained"
             color="primary"
             onClick={get_sentiments}
+            disabled={!platform}
             fullWidth
             sx={{ mt: 2 }}
           >
@@ -475,11 +495,14 @@ const FormComponent = () => {
               <span>Analyze</span>
             )}
           </Button>
+          <Typography>{analyzeError}</Typography>
       </Box>
       </Grid>
       <Grid id="visualizations" item xs={7}>
           {analysisData && 
               <Box>
+                <Typography sx={{ mt: 4}} variant="h3">Sentiments for {analyzedPlatform.platform} ({analyzedPlatform.num_comments} comments)</Typography>
+                <Divider sx={{ my: '20px' }} />
                 <TextRotatorComponent data={analysisData} />
                 <BarChartComponent data={analysisData} />
                 <LineChartComponent data={analysisData} />
