@@ -61,7 +61,7 @@ const FormComponent = () => {
   const [analyzeError, setAnalyzeError] = useState(null);
 
   // Default limit number
-  const [limit, setLimit] = useState(5);
+  const [limit, setLimit] = useState(null);
 
   // START LIVE DATASETS VARIABLES
   const [liveLimit, setLiveLimit] = useState(1);
@@ -73,13 +73,13 @@ const FormComponent = () => {
   const [dateRange, setDateRange] = useState({
     // TODO - Grey out dates that are not available to input
     start: dayjs("2020-10-01"), // default start: October 1, 2020
-    end: dayjs("2023-11-30"), // default end: November 30, 2023
+    end: dayjs(), // default end: November 30, 2023
   });
 
   const setDatesDefault = () => {
     setDateRange({
       start: dayjs("2020-10-01"), // October 1, 2020
-      end: dayjs("2023-11-30"), // November 30, 2023
+      end: dayjs(), // November 30, 2023
     });
   };
   
