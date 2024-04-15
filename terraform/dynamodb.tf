@@ -27,3 +27,24 @@ resource "aws_dynamodb_table" "db_sa_data" {
         Name = "SentAnalysisDataResults"
     }
 }
+resource "aws_dynamodb_table" "user_requests" {
+  name           = "UserRequests"
+  billing_mode   = "PAY_PER_REQUEST"  // This mode is suitable for unpredictable workload
+  hash_key       = "userID"
+  range_key      = "requestTime"
+
+  attribute {
+    name = "userID"
+    type = "S"  // S type for String
+  }
+
+  attribute {
+    name = "requestTime"
+    type = "S"  // S type for String, assuming requestTime is ISO8601 string
+  }
+
+  tags = {
+    Name = "UserRequests"
+    Environment = "dev"
+  }
+}

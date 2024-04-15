@@ -47,17 +47,18 @@ resource "aws_api_gateway_deployment" "sa_api_gateway_deployment" {
 //////////// SENTIMENTS GET
 /////////////////////////////////////////////////
 // GET sentiments/ (method request)
-resource "aws_api_gateway_method" "get_sentiments_method" {
+resource "aws_api_gateway_method" "put_sentiments_method" {
   rest_api_id   = aws_api_gateway_rest_api.sa_api_gateway.id
   resource_id   = aws_api_gateway_resource.sentiments_resource.id
-  http_method   = "GET"
+  http_method   = "PUT"
   authorization = "NONE"
 
   request_parameters = {
     "method.request.querystring.source"     = false,
     "method.request.querystring.limit"      = false,
     "method.request.querystring.date_range_from" = false,
-    "method.request.querystring.date_range_to"   = false
+    "method.request.querystring.date_range_to"   = false,
+    "method.request.querystring.user_id"        = false  // Optional: Capture userID if provided
   }
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway ]
 
@@ -67,29 +68,32 @@ resource "aws_api_gateway_method" "get_sentiments_method" {
 resource "aws_api_gateway_integration" "lambda" {
   rest_api_id             = aws_api_gateway_rest_api.sa_api_gateway.id
   resource_id             = aws_api_gateway_resource.sentiments_resource.id
-  http_method             = aws_api_gateway_method.get_sentiments_method.http_method
+  http_method             = aws_api_gateway_method.put_sentiments_method.http_method
 
-  integration_http_method = "POST"
+  integration_http_method = "PUT"
   type                    = "AWS_PROXY" 
 
-  uri                     = aws_lambda_function.get_sentiments.invoke_arn # Saranya's lambda function
+  uri                     = aws_lambda_function.put_sentiments.invoke_arn # Saranya's lambda function
   credentials             = aws_iam_role.sa_api_gateway_role.arn
   request_parameters = {
     "integration.request.querystring.source"             = "method.request.querystring.source" # source = method.request.querystring.source
     "integration.request.querystring.limit"              = "method.request.querystring.limit"
     "integration.request.querystring.date_range_from"    = "method.request.querystring.date_range_from"
     "integration.request.querystring.date_range_to"      = "method.request.querystring.date_range_to"
+    "integration.request.querystring.user_id"            = "method.request.querystring.user_id"  // Pass userID to Lambda
+
   }
 
-  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_method.get_sentiments_method, aws_api_gateway_resource.sentiments_resource ]
+  depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_method.put_sentiments_method, aws_api_gateway_resource.sentiments_resource ]
 }
 
 // sentiments GET - Integration response
-resource "aws_api_gateway_integration_response" "lambda_response_200" {
+resource "aws_api_gateway_integration_response" "put_sentiments_integration_response_200" {
   rest_api_id          = aws_api_gateway_rest_api.sa_api_gateway.id
   resource_id          = aws_api_gateway_resource.sentiments_resource.id
-  http_method          = aws_api_gateway_method.get_sentiments_method.http_method
+  http_method          = aws_api_gateway_method.put_sentiments_method.http_method
   status_code          = "200"
+
   response_templates = {
     "application/json" = ""
   }
@@ -97,11 +101,28 @@ resource "aws_api_gateway_integration_response" "lambda_response_200" {
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_integration.lambda ]
 }
 
+# resource "aws_api_gateway_integration_response" "options_integration_response" {
+#   rest_api_id   = aws_api_gateway_rest_api.sa_api_gateway.id
+#   resource_id   = aws_api_gateway_resource.sentiments_resource.id
+#   http_method   = aws_api_gateway_method.options_method.http_method
+#   status_code   = aws_api_gateway_method_response.options_200.status_code
+
+#   response_parameters = {
+#     "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
+#     "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST'",  // Include POST
+#     "method.response.header.Access-Control-Allow-Origin"  = "'*'"
+#   }
+
+#   depends_on = [aws_api_gateway_method_response.options_200]
+# }
+
+
+
 // sentiments GET - Method response
-resource "aws_api_gateway_method_response" "get_sentiments_method_response_200" {
+resource "aws_api_gateway_method_response" "put_sentiments_method_response_200" {
   rest_api_id = aws_api_gateway_rest_api.sa_api_gateway.id
   resource_id = aws_api_gateway_resource.sentiments_resource.id
-  http_method = aws_api_gateway_method.get_sentiments_method.http_method
+  http_method = aws_api_gateway_method.put_sentiments_method.http_method
   status_code = "200"
 
   response_models = {
@@ -115,6 +136,7 @@ resource "aws_api_gateway_method_response" "get_sentiments_method_response_200" 
 
   depends_on = [ aws_api_gateway_rest_api.sa_api_gateway, aws_api_gateway_integration.lambda ]
 }
+
 
 /////////////////////////////////////////////////
 //////////// SENTIMENTS POST
@@ -222,7 +244,7 @@ resource "aws_iam_policy" "sa_api_gateway_lambda_policy" {
     "Statement": [{
       "Effect": "Allow",
       "Action": "lambda:InvokeFunction",
-      "Resource": aws_lambda_function.get_sentiments.arn
+      "Resource": aws_lambda_function.put_sentiments.arn
     }]
   })
 
@@ -320,7 +342,7 @@ resource "aws_api_gateway_integration_response" "options_integration_response" {
     status_code   = aws_api_gateway_method_response.options_200.status_code
     response_parameters = {
         "method.response.header.Access-Control-Allow-Headers" = "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'",
-        "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST,GET'",
+        "method.response.header.Access-Control-Allow-Methods" = "'OPTIONS,POST,GET,PUT'",
         "method.response.header.Access-Control-Allow-Origin" = "'*'"
     }
     depends_on = [aws_api_gateway_method_response.options_200]

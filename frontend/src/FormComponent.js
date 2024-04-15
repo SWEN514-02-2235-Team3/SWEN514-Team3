@@ -86,8 +86,9 @@ const FormComponent = () => {
         alert("Sign up successful!");
       } else {
         console.log(`Username: ${username}, Password ${password}`);
-        await signIn(username, password);
+        const { isSignedIn, nextStep } = await signIn({ username, password });
         setUser(getCurrentUser());
+
         console.log("Sign in successful: ", user);
         alert("Sign in successful!");
       }
@@ -266,7 +267,7 @@ const FormComponent = () => {
               <Typography variant="h6" component="div" sx={{ marginRight: 2 }}>
                 Welcome {user.username}
               </Typography>
-              <Button color="inherit" onClick={signOut}>
+              <Button color="inherit" onClick={signOutApp}>
                 Sign Out
               </Button>
             </>

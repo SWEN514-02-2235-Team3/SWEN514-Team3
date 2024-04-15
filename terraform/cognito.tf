@@ -24,8 +24,6 @@ resource "aws_cognito_user_pool" "main" {
   depends_on = [aws_lambda_function.cognito_pre_signup]
 }
 
-
-
 resource "aws_lambda_permission" "allow_cognito" {
   statement_id  = "AllowCognitoInvocation"
   action        = "lambda:InvokeFunction"

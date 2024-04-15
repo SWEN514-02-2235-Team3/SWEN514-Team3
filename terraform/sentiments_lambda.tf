@@ -6,9 +6,9 @@ data "archive_file" "lambda_s3_sentiments_code" {
 }
 
 # lambda function
-resource "aws_lambda_function" "get_sentiments" {
+resource "aws_lambda_function" "put_sentiments" {
   filename      = data.archive_file.lambda_s3_sentiments_code.output_path
-  function_name = "get_sentiments"
+  function_name = "put_sentiments"
   role          = aws_iam_role.lambda_s3_sentiments_role.arn
   handler       = "sentiments.lambda_handler"
   runtime       = "python3.10"
