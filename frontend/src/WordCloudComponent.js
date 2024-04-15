@@ -109,6 +109,13 @@ const WordCloudComponent = ({ data }) => {
     }
   }
 
+  // // Function for checking if a word is English using is-word library
+  // const isWord = require('is-word');
+  // const englishWords = isWord('american-english');
+  // function isEnglish(word) {
+  //     return englishWords.check(word);
+  // }
+
   const processData = (data) => {
     let wordsMap = {};
     data.forEach((item) => {
@@ -119,7 +126,9 @@ const WordCloudComponent = ({ data }) => {
         const cleanedWord = word.replace(/[^a-zA-Z ]/g, "").toLowerCase();
         
         if (cleanedWord.length > 3 && cleanedWord.length < 15
-          && !blacklist.includes(cleanedWord)) {
+          && !blacklist.includes(cleanedWord)
+          // && isEnglish(cleanedWord)
+        ) {
           wordsMap[cleanedWord] = (wordsMap[cleanedWord] || 0) + 1;
         }
       });
@@ -131,7 +140,6 @@ const WordCloudComponent = ({ data }) => {
     return topWords.map((word) => ({
       value: word,
       count: wordsMap[word],
-      // color: word.length > 7 ? 'red' : 'green'
     }));
   };
 
@@ -159,8 +167,8 @@ const WordCloudComponent = ({ data }) => {
     /> */}
     <TagCloud
       tags={wordData}
-      minSize={10}
-      maxSize={250}
+      minSize={15}
+      maxSize={150}
     />
     </>
   );
