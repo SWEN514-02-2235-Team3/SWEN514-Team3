@@ -95,9 +95,10 @@ const FormComponent = () => {
   };
   
   const removeDates = () => {
+    const today = dayjs();
     setDateRange({
       start: null,
-      end: null,
+      end: today,
     });
   };
 

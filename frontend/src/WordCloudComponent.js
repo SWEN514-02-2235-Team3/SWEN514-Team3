@@ -13,7 +13,7 @@ const WordCloudComponent = ({ data }) => {
       words.forEach((word) => {
         //ewww regex stuff for normalizing everything.
         const cleanedWord = word.replace(/[^a-zA-Z ]/g, "").toLowerCase();
-        if (cleanedWord.length > 3) {
+        if (cleanedWord.length > 3 && cleanedWord.length < 15) {
           // Only consider words longer than 3 characters - TODO, update this to a more comprehensive filtering method
           wordsMap[cleanedWord] = (wordsMap[cleanedWord] || 0) + 1;
         }
