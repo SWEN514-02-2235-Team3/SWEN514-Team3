@@ -237,11 +237,18 @@ const FormComponent = () => {
       <Box>
       <FormControl component="fieldset">
               <FormLabel>Choose a platform
-                <Tooltip placement="right" title="Choose a platform to analyze sentiments from a dataset or live source. (REQUIRED)">
-                  <IconButton>
-                    <HelpOutlineIcon />
-                  </IconButton>
-                </Tooltip>
+              <Tooltip
+                placement="right"
+                title={
+                  <Typography variant="body1">
+                    Choose a platform to analyze sentiments from a dataset or live source. This is a required.
+                  </Typography>
+                }
+              >
+                <IconButton>
+                  <HelpOutlineIcon />
+                </IconButton>
+              </Tooltip>
               </FormLabel>     
               <RadioGroup
                 aria-label="platform"
@@ -272,11 +279,18 @@ const FormComponent = () => {
                 {platform == 'youtube_live' && 
                   <Box>
                     <Typography variant="h6">YouTube Live Datasets Options
-                    <Tooltip placement="right" title="You'll be able to generate sentiments from the YouTube API here. Once datasets are generated, you'll be able to analyze it in a separate request.">
-                    <IconButton>
-                      <HelpOutlineIcon />
-                    </IconButton>
-                  </Tooltip>
+                    <Tooltip
+                      placement="right"
+                      title={
+                        <Typography variant="body1">
+                          You'll be able to generate sentiments from the YouTube API here. Once datasets are generated, you'll be able to analyze it in a separate request.
+                        </Typography>
+                      }
+                    >
+                      <IconButton>
+                        <HelpOutlineIcon />
+                      </IconButton>
+                    </Tooltip>
                     </Typography>
 
                     <TextField
@@ -290,11 +304,18 @@ const FormComponent = () => {
                         }}
                         margin="normal"
                       />
-                  <Tooltip sx={{ mt: 2.5 }} placement="right" title="Select the number of videos you want to dynamically generate sentiments. You can only generate sentiments up to 10 videos at a time.">
-                    <IconButton>
-                      <HelpOutlineIcon />
-                    </IconButton>
-                  </Tooltip>
+                    <Tooltip sx={{ mt: 2.5 }}
+                      placement="right"
+                      title={
+                        <Typography variant="body1">
+                          Select the number of videos you want to dynamically generate sentiments. You can only generate sentiments up to 10 videos at a time.
+                        </Typography>
+                      }
+                    >
+                      <IconButton>
+                        <HelpOutlineIcon />
+                      </IconButton>
+                    </Tooltip>
                       <Box/>
                       <Button
                             variant="contained"
@@ -324,11 +345,18 @@ const FormComponent = () => {
       <Box>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
                 <FormLabel>Choose a date range
-                  <Tooltip placement="right" title="You can filter the sentiments by a date range. The data is displayed from the most recent comments to the oldest.">
-                    <IconButton>
-                      <HelpOutlineIcon />
-                    </IconButton>
-                  </Tooltip>
+                <Tooltip
+                      placement="right"
+                      title={
+                        <Typography variant="body1">
+                          You can filter the sentiments by a date range. The data is displayed from the most recent comments to the oldest.
+                        </Typography>
+                      }
+                    >
+                      <IconButton>
+                        <HelpOutlineIcon />
+                      </IconButton>
+                    </Tooltip>
                 </FormLabel>
                 <Box  sx={{ my: '20px' }}></Box>
                 <DatePicker
@@ -371,7 +399,14 @@ const FormComponent = () => {
       <Divider sx={{ my: '20px' }} />
       <Box>
       <FormLabel component="legend">Choose a number of datapoints 
-        <Tooltip placement="right" title="You can filter how many datapoints are shown on the visualizations. If none is provided then it will display all datapoints.">
+        <Tooltip
+          placement="right"
+          title={
+            <Typography variant="body1">
+              You can filter how many datapoints are shown on the visualizations. If none is provided then it will display all datapoints.
+            </Typography>
+          }
+        >
           <IconButton>
             <HelpOutlineIcon />
           </IconButton>
