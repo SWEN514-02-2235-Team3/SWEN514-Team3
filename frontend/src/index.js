@@ -6,6 +6,11 @@ import reportWebVitals from "./reportWebVitals";
 import { Amplify } from "aws-amplify";
 import config from "./aws_exports";
 
+config["Auth"]["Cognito"]["userPoolId"] =
+  process.env.REACT_APP_COGNITO_USER_POOL_ID;
+config["Auth"]["Cognito"]["userPoolClientId"] =
+  process.env.REACT_APP_COGNITO_CLIENT_ID;
+
 Amplify.configure(config);
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
