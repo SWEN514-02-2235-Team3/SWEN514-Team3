@@ -160,6 +160,7 @@ const FormComponent = () => {
       await signOut();
       setUser(null);
       setPlatforms(""); // Reset the platform state to empty, which will uncheck all radio buttons
+      setAnalysisData(null);
       alert("Signed out successfully!");
     } catch (error) {
       console.error("Error signing out: ", error);
