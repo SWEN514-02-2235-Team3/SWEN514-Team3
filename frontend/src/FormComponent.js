@@ -140,6 +140,7 @@ const FormComponent = () => {
   const get_sentiments = async () => {
     const invokeURL = process.env.REACT_APP_API_URL; // for local development this is available on the frontend/.env file from deploying terraform infra; available as environment variable for amplify
     setLoading(1);
+    setAnalyzeError("");
 
     // Put dates in yyyy-mm-dd format
     const start = new Date(dateRange.start);
@@ -179,7 +180,7 @@ const FormComponent = () => {
 
       .catch((error) => {
         console.error("Error fetching data:", error);
-        setAnalyzeError("Error fetching data:", error);
+        setAnalyzeError(`Error fetching data: ${error}`);
       })
 
       .finally(() => {
