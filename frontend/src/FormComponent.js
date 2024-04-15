@@ -206,6 +206,8 @@ const FormComponent = () => {
 
   const [platform, setPlatforms] = useState("");
 
+  const [dateRangeIsLegal, setDateRangeIsLegal] = useState(true);
+  
   const [dateRange, setDateRange] = useState({
     // TODO - Grey out dates that are not available to input
     start: dayjs("2020-10-01"), // default start: October 1, 2020
@@ -633,6 +635,7 @@ const FormComponent = () => {
                 onChange={(newValue) => {
                   handleDateChange("start", newValue);
                 }}
+                maxDate={dateRange.end} // Set maxDate to the selected start date            
                 renderInput={(params) => <TextField {...params} />}
                 sx={{ width: "170px" }}
               />
@@ -643,10 +646,11 @@ const FormComponent = () => {
                 onChange={(newValue) => {
                   handleDateChange("end", newValue);
                 }}
+                minDate={dateRange.start} // Set minDate to the selected start date
                 renderInput={(params) => <TextField {...params} />}
                 sx={{ width: "170px" }}
               />
-            </LocalizationProvider>
+           </LocalizationProvider>
             <Button
               variant="contained"
               color="primary"
@@ -715,7 +719,7 @@ const FormComponent = () => {
               variant="contained"
               color="primary"
               onClick={get_sentiments}
-              disabled={!platform}
+              disabled={!platform || !(dateRange.start < dateRange.end)}
               fullWidth
               sx={{ mt: 2 }}
             >
