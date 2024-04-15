@@ -64,6 +64,7 @@ def handler(event, context):
                         'comment': {'S': comment},
                         'sentiment': {'S' : sentiment},
                         'platform': {'S': dataset_category},
+                        'video_id': {'S': ""}  
                     }
                 )
                 print(f"INFO: [{date}][{dataset_category}] {sentiment}: {comment}")   

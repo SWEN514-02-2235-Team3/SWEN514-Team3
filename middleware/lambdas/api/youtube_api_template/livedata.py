@@ -6,6 +6,7 @@ import boto3
 import botocore.exceptions
 from dateutil.parser import parse
 import random
+import uuid
 
 # Your API key
 api_key = "AIzaSyBwar2tkCtOhYkkQngj6qTZuvSnyU6GuM0"
@@ -79,60 +80,62 @@ def lambda_handler(event, context):
         video_id = each['id']['videoId']
         videos_analyzed+=1;        
         
-        # Check if the item exists in the DynamoDB table
-        response = dynamodb_client.get_item(
-            TableName="SentAnalysisDataResults",
-            Key={
-                'id': {'S': video_id}  # Assuming 'id' is the primary key of type string
-            }
-        )
-        # If the item exists, return True
+        try:
+            # Check if the item exists in the DynamoDB table
+            response = dynamodb_client.get_item(
+                TableName="SentAnalysisDataResults",
+                Key={
+                    'video_id': {'S': video_id}  # Assuming 'id' is the primary key of type string
+                }
+            )
+        except botocore.exceptions.ClientError: # most likely no records in database
+            response = dict()
         if 'Item' in response:
             sentiment = response['Item'].get('sentiment', {}).get('S')
             if sentiment: 
                 print("Youtube comment already processed")
                 videos_analyzed-=1
-                print(response['Item'])
                 continue # go onto the next item if we've already processed that youtube url
         else:
             print("PROCESSING YOUTUBE COMMENT")        
             # Initial request to retrieve comment threads
-            try:
-                request = youtube.commentThreads().list(
-                    part="snippet",
-                    videoId=video_id,
-                    maxResults=100, 
-                    textFormat="plainText"
-                )
-                response = request.execute()
-                for item in response['items']:
-                    comment = item['snippet']['topLevelComment']['snippet']['textDisplay']
-                    comment_date = item['snippet']['topLevelComment']['snippet']['publishedAt']
-                    date = None
-                    try: # parse date
-                        date = parse(comment_date, fuzzy=True)
-                        date = str(date)[:10]
-                    except: continue # skip if its not a valid date
-                    
-                    sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment'] # Generate Sentiment
-                    
-                    item = {
-                        'id': video_id,
-                        'comment': comment,
-                        'publish_date': date,
-                        'sentiment': sentiment
-                    }
-                    #print(item)
-                    
-                    for _ in range(3):
-                        try:
-                            put_record(video_id, date, comment, sentiment)
-                            generated_sentiments+=1
-                            break # break the loop 
-                        except botocore.exceptions.ClientError: # dont process dataset
-                            print(f"WARNING: Couldn't upload {item} to dynamodb...")
-            except:
-                print("Comments disabled on yt video")
+            request = youtube.commentThreads().list(
+                part="snippet",
+                videoId=video_id,
+                maxResults=100, 
+                textFormat="plainText"
+            )
+            response = request.execute()
+            for item in response['items']:
+                comment = item['snippet']['topLevelComment']['snippet']['textDisplay']
+                comment_date = item['snippet']['topLevelComment']['snippet']['publishedAt']
+                date = None
+                try: # parse date
+                    date = parse(comment_date, fuzzy=True)
+                    date = str(date)[:10]
+                except: continue # skip if its not a valid date
+                
+                sentiment = comprehend_client.detect_sentiment(Text=comment, LanguageCode='en')['Sentiment'] # Generate Sentiment
+                print(f"[{date}] {sentiment} - {comment}")
+                
+                # Generate a non-blocking UUID and insert record to dynamodb
+                for _ in range(3):
+                    try:
+                        dynamodb_client.put_item(
+                            TableName="SentAnalysisDataResults",
+                            Item={
+                                'id': {'S': str(uuid.uuid4())}, # set a random id
+                                'comment_date': {'S': comment_date},
+                                'comment': {'S': comment},
+                                'sentiment': {'S' : sentiment},
+                                'platform': {'S': 'youtube_live'},
+                                'video_id': {'S': video_id}
+                            }
+                        ) 
+                        generated_sentiments+=1
+                        break
+                    except botocore.exceptions.ClientError: # dont process dataset
+                        print(f"WARNING: Couldn't upload [{date}] {sentiment} - {comment} to dynamodb...")
     return {
         'statusCode': 200,
         'headers': {
@@ -146,16 +149,3 @@ def lambda_handler(event, context):
             'comments_analyzed': generated_sentiments
         })
     }
-
-def put_record(video_id, publish_date, comment, sentiment):
-    # Generate a non-blocking UUID and insert record to dynamodb
-    dynamodb_client.put_item(
-        TableName="SentAnalysisDataResults",
-        Item={
-            'id': {'S':video_id}, # set a random id
-            'comment_date': {'S': publish_date},
-            'comment': {'S': comment},
-            'sentiment': {'S' : sentiment},
-            'platform': {'S': 'youtube_live'},
-        }
-    ) 
