@@ -66,7 +66,6 @@ const FormComponent = () => {
 
   //sidebar toggler
   const [isFirstLoad, setIsFirstLoad] = useState(true);
-  const [analysisData, setAnalysisData] = useState(null);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // Handler to toggle sidebar
