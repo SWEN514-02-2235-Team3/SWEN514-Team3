@@ -53,6 +53,12 @@ const FormComponent = () => {
 
   // data received from API
   const [analysisData, setAnalysisData] = useState(null);
+  const [analyzedPlatform, setAnalyzedPlatform] = useState({
+        platform: null,
+        num_comments: 0,
+      }
+    );
+  const [analyzeError, setAnalyzeError] = useState(null);
 
   // Default limit number
   const [limit, setLimit] = useState(5);
@@ -147,6 +153,11 @@ const FormComponent = () => {
       .then((data) => {
         console.log(data);
         setAnalysisData(data);
+        setAnalyzedPlatform(platform);
+        setAnalyzedPlatform({
+          platform: platform,
+          num_comments: data.length,
+        });
       })
 
       .catch((error) => {
@@ -469,6 +480,8 @@ const FormComponent = () => {
       <Grid id="visualizations" item xs={7}>
           {analysisData && 
               <Box>
+                <Typography sx={{ mt: 4}} variant="h3">Sentiments for {analyzedPlatform.platform} ({analyzedPlatform.num_comments} comments)</Typography>
+                <Divider sx={{ my: '20px' }} />
                 <BarChartComponent data={analysisData} />
                 <LineChartComponent data={analysisData} />
                 <PieChartComponent data={analysisData} />
