@@ -34,6 +34,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import LineChartComponent from "./LineChartComponent";
+import TextRotatorComponent from "./TextRotatorComponent";
 
 const theme = createTheme({
   palette: {
@@ -62,6 +63,23 @@ const FormComponent = () => {
 
   // Default limit number
   const [limit, setLimit] = useState(null);
+
+  //sidebar toggler
+  const [isFirstLoad, setIsFirstLoad] = useState(true);
+  const [analysisData, setAnalysisData] = useState(null);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  // Handler to toggle sidebar
+    const toggleSidebar = () => {
+      setSidebarCollapsed(!sidebarCollapsed);
+    };
+
+   // Handler when the user clicks "Analyze"
+   const handleAnalyze = async () => {
+    // Function to fetch data goes here...
+    setIsFirstLoad(false); // Exit fullscreen mode after analysis
+  };
+
 
   // START LIVE DATASETS VARIABLES
   const [liveLimit, setLiveLimit] = useState(1);
@@ -237,13 +255,7 @@ const FormComponent = () => {
     <ThemeProvider theme={theme}>
       <AppBar position="static" color="primary">
         <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
-          >
+          <IconButton size="large" edge="start" color="inherit" aria-label="menu" sx={{ mr: 2 }}>
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
@@ -491,6 +503,7 @@ const FormComponent = () => {
               <Box>
                 <Typography sx={{ mt: 4}} variant="h3">Sentiments for {analyzedPlatform.platform} ({analyzedPlatform.num_comments} comments)</Typography>
                 <Divider sx={{ my: '20px' }} />
+                <TextRotatorComponent data={analysisData} />
                 <BarChartComponent data={analysisData} />
                 <LineChartComponent data={analysisData} />
                 <PieChartComponent data={analysisData} />
