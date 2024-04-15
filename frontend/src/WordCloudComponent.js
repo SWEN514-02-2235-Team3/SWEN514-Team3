@@ -131,7 +131,6 @@ const WordCloudComponent = ({ data }) => {
     return topWords.map((word) => ({
       value: word,
       count: wordsMap[word],
-      // color: word.length > 7 ? 'red' : 'green'
     }));
   };
 
