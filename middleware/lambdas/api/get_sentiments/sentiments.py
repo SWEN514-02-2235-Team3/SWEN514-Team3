@@ -67,11 +67,13 @@ def lambda_handler(event, context):
         query_params['ExpressionAttributeValues'][":to_date"] = to_date
     
     # combine each expression into a single expression
+    print(f"filter_expressions_unparsed (query): {filter_expressions_unparsed}")
     if filter_expressions_unparsed:
         query_params['FilterExpression'] = ' AND '.join(filter_expressions_unparsed)
     else: # if there are no paramaters then we don't need this anymore
         query_params.pop("ExpressionAttributeValues")
     
+    print(f"query_params (query): {query_params}")
     # retrieve dynamodb response from scan       
     response = table.scan(**query_params)['Items']
     if response:

@@ -5,8 +5,8 @@ API Gateway Code Structure
 Main API Gateway (sa_api_gateway)
     GET sentiments/
         Query Parameter:
-        source (str OPTIONAL): Filter by source (i.e. facebook, twitter).
-            > If no input is provided then it checks all sources
+        platform (str OPTIONAL): Filter by platform (i.e. facebook, twitter).
+            > If no input is provided then it checks all platforms
         limit (str default=30): Limit on how many records to
             > If no input is provided then the default is 30
 
@@ -54,7 +54,7 @@ resource "aws_api_gateway_method" "get_sentiments_method" {
   authorization = "NONE"
 
   request_parameters = {
-    "method.request.querystring.source"     = false,
+    "method.request.querystring.platform"     = false,
     "method.request.querystring.limit"      = false,
     "method.request.querystring.date_range_from" = false,
     "method.request.querystring.date_range_to"   = false
@@ -75,7 +75,7 @@ resource "aws_api_gateway_integration" "lambda" {
   uri                     = aws_lambda_function.get_sentiments.invoke_arn # Saranya's lambda function
   credentials             = aws_iam_role.sa_api_gateway_role.arn
   request_parameters = {
-    "integration.request.querystring.source"             = "method.request.querystring.source" # source = method.request.querystring.source
+    "integration.request.querystring.platform"             = "method.request.querystring.platform" # platform = method.request.querystring.platform
     "integration.request.querystring.limit"              = "method.request.querystring.limit"
     "integration.request.querystring.date_range_from"    = "method.request.querystring.date_range_from"
     "integration.request.querystring.date_range_to"      = "method.request.querystring.date_range_to"
@@ -149,7 +149,7 @@ resource "aws_api_gateway_integration" "youtube_live" {
   uri                     = aws_lambda_function.get_sentiments_youtube.invoke_arn # Saranya's lambda function
   credentials             = aws_iam_role.sa_api_gateway_role.arn
   request_parameters = {
-    "integration.request.querystring.region"             = "method.request.querystring.region" # source = method.request.querystring.source
+    "integration.request.querystring.region"             = "method.request.querystring.region" # platform = method.request.querystring.platform
     "integration.request.querystring.max_results"              = "method.request.querystring.max_results"
     "integration.request.querystring.date_from"    = "method.request.querystring.date_from"
     "integration.request.querystring.date_to"      = "method.request.querystring.date_to"

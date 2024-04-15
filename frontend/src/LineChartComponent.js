@@ -24,8 +24,18 @@ const LineChartComponent = ({ data }) => {
         commentsByDate[monthYear]++;
       }
     });
-    return commentsByDate;
+  
+    // Reverse the monthYear objects because they are backwards by default
+    const keys = Object.keys(commentsByDate);
+    keys.reverse();
+    const reversedCommentsByDate = {};
+    keys.forEach(monthYear => {
+      reversedCommentsByDate[monthYear] = commentsByDate[monthYear];
+    });
+  
+    return reversedCommentsByDate;
   };
+  
 
   // Format dataset for LineChart
   const formatDataset = () => {

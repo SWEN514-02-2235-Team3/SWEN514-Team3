@@ -65,10 +65,9 @@ const FormComponent = () => {
   const [platform, setPlatforms] = useState("");
 
   const [dateRange, setDateRange] = useState({
-    // Random boundaries for now
     // TODO - Grey out dates that are not available to input
-    start: dayjs("2020-10-01"), // October 1, 2020
-    end: dayjs("2023-11-30"), // November 30, 2023
+    start: dayjs("2020-10-01"), // default start: October 1, 2020
+    end: dayjs("2023-11-30"), // default end: November 30, 2023
   });
 
   const setDatesDefault = () => {
@@ -117,10 +116,19 @@ const FormComponent = () => {
   const get_sentiments = async () => {
     const invokeURL = process.env.REACT_APP_API_URL; // for local development this is available on the frontend/.env file from deploying terraform infra; available as environment variable for amplify
     setLoading(1);
+
+    // Put dates in yyyy-mm-dd format
+    const start = new Date(dateRange.start);
+    const formattedStartDate = `${start.getFullYear()}-${(start.getMonth() + 1).toString().padStart(2, '0')}-${start.getDate().toString().padStart(2, '0')}`;
+    const end = new Date(dateRange.end);
+    const formattedEndDate = `${end.getFullYear()}-${(end.getMonth() + 1).toString().padStart(2, '0')}-${end.getDate().toString().padStart(2, '0')}`;
+
     // Define query string parameters
     const queryParams = new URLSearchParams({
       limit: limit,
-      source: platform,
+      platform: platform,
+      date_range_from: formattedStartDate,
+      date_range_to: formattedEndDate
     });
 
     // Construct the full URL with query string parameters
