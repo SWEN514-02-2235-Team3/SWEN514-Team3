@@ -38,7 +38,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import LineChartComponent from "./LineChartComponent";
-import PopularWordsChart from "./PopularWordsChart";
+// import PopularWordsChart from "./PopularWordsChart";
 
 const theme = createTheme({
   palette: {
@@ -128,8 +128,9 @@ const FormComponent = () => {
   const handleModalClose = () => setModalOpen(false);
 
   const handleAuthAction = async (event) => {
-    testRegex(process.env.REACT_APP_COGNITO_CLIENT_ID); // Log to verify the exact value being used
-    testRegex(process.env.REACT_APP_COGNITO_USER_POOL_ID); // Log to verify the exact value being used
+    // testRegex(process.env.REACT_APP_COGNITO_CLIENT_ID); // Log to verify the exact value being used
+    // testRegex(process.env.REACT_APP_COGNITO_USER_POOL_ID); // Log to verify the exact value being used
+
     event.preventDefault();
     const username = event.target.username.value;
     const password = event.target.password.value;
@@ -740,7 +741,6 @@ const FormComponent = () => {
                 {analyzedPlatform.num_comments} comments)
               </Typography>
               <Divider sx={{ my: "20px" }} />
-              <PopularWordsChart data={analysisData} />
               <BarChartComponent data={analysisData} />
               <LineChartComponent data={analysisData} />
               <PieChartComponent data={analysisData} />
