@@ -34,7 +34,7 @@ import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs from "dayjs";
 import LineChartComponent from "./LineChartComponent";
-import TextRotatorComponent from "./TextRotatorComponent";
+import PopularWordsChart from "./PopularWordsChart";
 
 const theme = createTheme({
   palette: {
@@ -502,7 +502,7 @@ const FormComponent = () => {
               <Box>
                 <Typography sx={{ mt: 4}} variant="h3">Sentiments for {analyzedPlatform.platform} ({analyzedPlatform.num_comments} comments)</Typography>
                 <Divider sx={{ my: '20px' }} />
-                <TextRotatorComponent data={analysisData} />
+                <PopularWordsChart data={analysisData} />
                 <BarChartComponent data={analysisData} />
                 <LineChartComponent data={analysisData} />
                 <PieChartComponent data={analysisData} />
