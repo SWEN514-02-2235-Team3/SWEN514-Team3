@@ -162,6 +162,7 @@ const FormComponent = () => {
 
       .catch((error) => {
         console.error("Error fetching data:", error);
+        setAnalyzeError("Error fetching data:", error);
       })
 
       .finally(() => {
@@ -381,6 +382,7 @@ const FormComponent = () => {
                 <Box  sx={{ my: '20px' }}></Box>
                 <DatePicker
                   label="Start Date"
+                  disabled={!platform}
                   value={dateRange.start}
                   onChange={(newValue) => {
                     handleDateChange("start", newValue);
@@ -390,6 +392,7 @@ const FormComponent = () => {
                 />
                 <DatePicker
                   label="End Date"
+                  disabled={!platform}
                   value={dateRange.end}
                   onChange={(newValue) => {
                     handleDateChange("end", newValue);
@@ -401,6 +404,7 @@ const FormComponent = () => {
               <Button
                 variant="contained"
                 color="primary"
+                disabled={!platform}
                 onClick={() => removeDates()}
                 sx={{ mt: 1, mx:1 }}
               >
@@ -410,6 +414,7 @@ const FormComponent = () => {
               <Button
                 variant="contained"
                 color="primary"
+                disabled={!platform}
                 onClick={() => setDatesDefault()}
                 sx={{ mt: 2}}
               >
@@ -435,6 +440,7 @@ const FormComponent = () => {
         <TextField
           label="Limit"
           type="number"
+          disabled={!platform}
           variant="outlined"
           value={limit}
           onChange={(e) => setLimit(e.target.value)}
@@ -447,6 +453,7 @@ const FormComponent = () => {
         <Button
           variant="contained"
           color="primary"
+          disabled={!platform}
           onClick={() => 
             setLimit('')
             
@@ -462,6 +469,7 @@ const FormComponent = () => {
             variant="contained"
             color="primary"
             onClick={get_sentiments}
+            disabled={!platform}
             fullWidth
             sx={{ mt: 2 }}
           >
@@ -475,6 +483,7 @@ const FormComponent = () => {
               <span>Analyze</span>
             )}
           </Button>
+          <Typography>{analyzeError}</Typography>
       </Box>
       </Grid>
       <Grid id="visualizations" item xs={7}>
