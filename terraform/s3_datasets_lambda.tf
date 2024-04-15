@@ -37,7 +37,7 @@ resource "aws_lambda_function" "lambda_s3_datasets" {
   runtime       = "python3.9"
   handler       = "process_dataset.handler"
   filename      = data.archive_file.lambda_s3_datasets_code.output_path
-  timeout       = 3600 # 10 minute timeout
+  timeout       = 900 # 10 minute timeout
 
   depends_on = [aws_iam_role_policy_attachment.lambda_s3_datasets_policy_attach]
 }
