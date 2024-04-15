@@ -44,7 +44,7 @@ const theme = createTheme({
   palette: {
     mode: "dark",
     primary: {
-      main: "#00b0ff",
+      main: "#00b0ff", // Primary
     },
     secondary: {
       main: "#f50057", // Pink for username
@@ -128,8 +128,8 @@ const FormComponent = () => {
   const handleModalClose = () => setModalOpen(false);
 
   const handleAuthAction = async (event) => {
-    // testRegex(process.env.REACT_APP_COGNITO_CLIENT_ID); // Log to verify the exact value being used
-    // testRegex(process.env.REACT_APP_COGNITO_USER_POOL_ID); // Log to verify the exact value being used
+    console.log(process.env.REACT_APP_COGNITO_CLIENT_ID); // Log to verify the exact value being used
+    console.log(process.env.REACT_APP_COGNITO_USER_POOL_ID); // Log to verify the exact value being used
 
     event.preventDefault();
     const username = event.target.username.value;
@@ -389,7 +389,11 @@ const FormComponent = () => {
 
   return (
     <ThemeProvider theme={theme}>
-      <AppBar position="static" color="primary">
+      <AppBar
+        position="static"
+        color="secondary"
+        style={{ backgroundColor: "#00b0ff" }}
+      >
         <Toolbar>
           <IconButton
             size="large"
@@ -401,7 +405,7 @@ const FormComponent = () => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            Sentiment Analysis
+            COVID-19 Sentiment Analysis
           </Typography>
           {user ? (
             <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "left" }}>
