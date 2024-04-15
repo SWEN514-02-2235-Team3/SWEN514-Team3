@@ -52,6 +52,55 @@ const theme = createTheme({
   },
 });
 
+function testRegex(inputString) {
+  // Define the regex pattern as described
+  const pattern = /[\w+]+/g; // This seems to be the pattern you were given, but it might be intended to be /[\w]+/g
+
+  // Find all matches for the pattern
+  const matches = inputString.match(pattern);
+  console.log("Matches found:", matches);
+
+  // Test if the entire string matches the pattern
+  const fullMatch = pattern.test(inputString);
+  console.log("Does the entire string match the pattern? ", fullMatch);
+
+  // Highlighting parts of the string that do not match
+  // Reconstruct the string with non-matching parts highlighted
+  let lastIndex = 0;
+  let resultString = "";
+
+  if (matches) {
+    matches.forEach((match) => {
+      const startIndex = inputString.indexOf(match, lastIndex);
+      const endIndex = startIndex + match.length;
+
+      // Append the part of the string before the match (non-matching part)
+      resultString +=
+        inputString.substring(lastIndex, startIndex) + "[Non-Match Start]";
+      // Append the match
+      resultString += match + "[Match End]";
+      // Update the lastIndex to be the end of the current match
+      lastIndex = endIndex;
+    });
+
+    // Append any remaining part of the string after the last match
+    if (lastIndex < inputString.length) {
+      resultString +=
+        "[Non-Match Start]" +
+        inputString.substring(lastIndex) +
+        "[Non-Match End]";
+    }
+  } else {
+    // No matches found, the entire string is a non-match
+    resultString = "[Non-Match Start]" + inputString + "[Non-Match End]";
+  }
+
+  console.log(
+    "Reconstructed string with non-matching parts highlighted: ",
+    resultString
+  );
+}
+
 const FormComponent = () => {
   const [isModalOpen, setModalOpen] = useState(false);
   const [authMode, setAuthMode] = useState("signin"); // 'signin' or 'signup'
@@ -79,6 +128,8 @@ const FormComponent = () => {
   const handleModalClose = () => setModalOpen(false);
 
   const handleAuthAction = async (event) => {
+    testRegex(process.env.REACT_APP_COGNITO_CLIENT_ID); // Log to verify the exact value being used
+    testRegex(process.env.REACT_APP_COGNITO_USER_POOL_ID); // Log to verify the exact value being used
     event.preventDefault();
     const username = event.target.username.value;
     const password = event.target.password.value;
