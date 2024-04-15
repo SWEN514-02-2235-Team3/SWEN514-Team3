@@ -159,6 +159,7 @@ const FormComponent = () => {
     try {
       await signOut();
       setUser(null);
+      setPlatforms(""); // Reset the platform state to empty, which will uncheck all radio buttons
       alert("Signed out successfully!");
     } catch (error) {
       console.error("Error signing out: ", error);
@@ -403,9 +404,7 @@ const FormComponent = () => {
             Sentiment Analysis
           </Typography>
           {user ? (
-            <Box
-              sx={{ flexGrow: 1, display: "flex", justifyContent: "center" }}
-            >
+            <Box sx={{ flexGrow: 1, display: "flex", justifyContent: "left" }}>
               <Typography variant="h6" component="span" sx={{ mr: 1 }}>
                 Welcome
               </Typography>
