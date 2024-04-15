@@ -1,10 +1,19 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import ReactDOM from "react-dom/client";
+import "./index.css";
+import App from "./App";
+import reportWebVitals from "./reportWebVitals";
+import { Amplify } from "aws-amplify";
+import config from "./aws_exports";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
+config["Auth"]["Cognito"]["userPoolId"] =
+  process.env.REACT_APP_COGNITO_USER_POOL_ID;
+config["Auth"]["Cognito"]["userPoolClientId"] =
+  process.env.REACT_APP_COGNITO_CLIENT_ID;
+
+Amplify.configure(config);
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
   <React.StrictMode>
     <App />
