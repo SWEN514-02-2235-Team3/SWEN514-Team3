@@ -26,8 +26,18 @@ const BarChartComponent = ({ data }) => {
         sentimentsByDate[monthYear][item.sentiment] = 1;
       }
     });
-    return sentimentsByDate;
+  
+    // Reverse the monthYear objects because they are backwards by default
+    const keys = Object.keys(sentimentsByDate);
+    keys.reverse();
+    const reversedSentimentsByDate = {};
+    keys.forEach(monthYear => {
+      reversedSentimentsByDate[monthYear] = sentimentsByDate[monthYear];
+    });
+  
+    return reversedSentimentsByDate;
   };
+  
 
   // Format dataset for BarChart
   const formatDataset = () => {
