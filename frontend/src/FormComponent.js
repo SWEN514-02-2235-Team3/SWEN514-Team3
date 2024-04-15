@@ -20,7 +20,9 @@ import {
   Divider,
   Stack,
   useThemeProps,
+  Tooltip,
 } from "@mui/material";
+import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
 import MenuIcon from '@mui/icons-material/Menu';
 import WordCloudComponent from "./WordCloudComponent";
 import BarChartComponent from "./BarChartComponent";
@@ -68,6 +70,20 @@ const FormComponent = () => {
     start: dayjs("2020-10-01"), // October 1, 2020
     end: dayjs("2023-11-30"), // November 30, 2023
   });
+
+  const setDatesDefault = () => {
+    setDateRange({
+      start: dayjs("2020-10-01"), // October 1, 2020
+      end: dayjs("2023-11-30"), // November 30, 2023
+    });
+  };
+  
+  const removeDates = () => {
+    setDateRange({
+      start: null,
+      end: null,
+    });
+  };
 
   const [loading, setLoading] = useState(0);
   const [liveDatasetsLoading, setLiveDatasetsLoading] = useState(0);
@@ -158,12 +174,28 @@ const FormComponent = () => {
       .then((data) => {
           // Parse the response object
           const { videos_found, videos_analyzed, comments_analyzed } = data;
-          const statusString = '';
+          let statusString = <Box></Box>;
           // Construct the status string
           if (!comments_analyzed) {
-            statusString = `Could not find any comments across ${videos_analyzed} analyzed videos (${videos_found} total found). Retry again to generate more datasets.`
+            statusString = <Box>
+              <Typography>Could not find any comments across {videos_analyzed} analyzed videos ({videos_found} total found).</Typography>
+              {(videos_analyzed == 0 && videos_found > 0) && 
+                <Typography>This is because {videos_found} have already been analyzed.</Typography>
+                }
+                <Typography>Retry again to generate more datasets.</Typography>
+            </Box>;
           } else {
-            statusString = `Generated ${comments_analyzed} sentiments (comments) from ${videos_analyzed} videos (${videos_found} total found).`;
+            statusString = <Box><Typography>
+              Generated {comments_analyzed} sentiments (comments) from {videos_analyzed} video(s).
+              {
+                // TODO: Should paste youtube IDs of videos that has been generated alongside their comments
+              }
+              </Typography>
+              { (videos_analyzed != videos_found) &&
+              <Typography>{videos_found - videos_analyzed} of which has been ignored since sentiments have already been generated.</Typography>
+              }
+              <Typography>Retry again to generate more datasets.</Typography>
+              </Box>;
           }
           // Set the status string
           setLiveStatus(statusString);
@@ -171,6 +203,7 @@ const FormComponent = () => {
       })
 
       .catch((error) => {
+        console.error(error);
         setLiveStatus(error.message || "Error occurred while fetching data.");
       })
 
@@ -203,7 +236,13 @@ const FormComponent = () => {
         <Typography variant="h4"  sx={{ flexGrow: 1 }}>Analysis Options</Typography>
       <Box>
       <FormControl component="fieldset">
-              <FormLabel>Choose your platform</FormLabel>
+              <FormLabel>Choose a platform
+                <Tooltip placement="right" title="Choose a platform to analyze sentiments from a dataset or live source. (REQUIRED)">
+                  <IconButton>
+                    <HelpOutlineIcon />
+                  </IconButton>
+                </Tooltip>
+              </FormLabel>     
               <RadioGroup
                 aria-label="platform"
                 name="platform"
@@ -232,7 +271,14 @@ const FormComponent = () => {
                 />
                 {platform == 'youtube_live' && 
                   <Box>
-                    <Typography variant="h6">YouTube Live Datasets Options </Typography>
+                    <Typography variant="h6">YouTube Live Datasets Options
+                    <Tooltip placement="right" title="You'll be able to generate sentiments from the YouTube API here. Once datasets are generated, you'll be able to analyze it in a separate request.">
+                    <IconButton>
+                      <HelpOutlineIcon />
+                    </IconButton>
+                  </Tooltip>
+                    </Typography>
+
                     <TextField
                         label="Videos to Analyze (Max 10)"
                         type="number"
@@ -244,6 +290,11 @@ const FormComponent = () => {
                         }}
                         margin="normal"
                       />
+                  <Tooltip sx={{ mt: 2.5 }} placement="right" title="Select the number of videos you want to dynamically generate sentiments. You can only generate sentiments up to 10 videos at a time.">
+                    <IconButton>
+                      <HelpOutlineIcon />
+                    </IconButton>
+                  </Tooltip>
                       <Box/>
                       <Button
                             variant="contained"
@@ -272,7 +323,13 @@ const FormComponent = () => {
       <Divider sx={{ my: '20px' }} />
       <Box>
       <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <FormLabel>Choose a date range</FormLabel>
+                <FormLabel>Choose a date range
+                  <Tooltip placement="right" title="You can filter the sentiments by a date range. The data is displayed from the most recent comments to the oldest.">
+                    <IconButton>
+                      <HelpOutlineIcon />
+                    </IconButton>
+                  </Tooltip>
+                </FormLabel>
                 <Box  sx={{ my: '20px' }}></Box>
                 <DatePicker
                   label="Start Date"
@@ -293,10 +350,33 @@ const FormComponent = () => {
                   sx={{ width: '170px' }}
                 />
               </LocalizationProvider>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => removeDates()}
+                sx={{ mt: 1, mx:1 }}
+              >
+                <span>Clear</span>
+              </Button> 
+              <Box/>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setDatesDefault()}
+                sx={{ mt: 2}}
+              >
+                <span>Reset to Default Dates</span>
+              </Button>
       </Box>
       <Divider sx={{ my: '20px' }} />
       <Box>
-      <FormLabel component="legend">Choose a number of datapoints </FormLabel>
+      <FormLabel component="legend">Choose a number of datapoints 
+        <Tooltip placement="right" title="You can filter how many datapoints are shown on the visualizations. If none is provided then it will display all datapoints.">
+          <IconButton>
+            <HelpOutlineIcon />
+          </IconButton>
+        </Tooltip>
+      </FormLabel>
         <TextField
           label="Limit"
           type="number"
@@ -309,6 +389,17 @@ const FormComponent = () => {
           margin="normal"
           sx={{ width: '170px' }}
         />
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={() => 
+            setLimit('')
+            
+          }
+          sx={{ mt: 3, mx:1 }}
+        >
+          <span>Clear</span>
+        </Button> 
       </Box>
       <Divider sx={{ my: '20px' }} />
       <Box>
