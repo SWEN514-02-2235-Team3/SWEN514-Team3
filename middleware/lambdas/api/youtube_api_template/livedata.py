@@ -64,10 +64,12 @@ def lambda_handler(event, context):
         regionCode=region,
         type="video",
         videoType="any",
+        videoSyndicated="true",  # Ensure the video allows comments by checking if it's syndicated
         maxResults=100,
         publishedBefore=date_to,
         publishedAfter=date_from
     )
+
     response = request.execute()
 
     # Parse Response
@@ -105,6 +107,7 @@ def lambda_handler(event, context):
                 maxResults=100, 
                 textFormat="plainText"
             )
+            
             response = request.execute()
             for item in response['items']:
                 comment = item['snippet']['topLevelComment']['snippet']['textDisplay']

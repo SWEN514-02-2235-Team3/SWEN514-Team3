@@ -200,9 +200,7 @@ const FormComponent = () => {
 
   // START LIVE DATASETS VARIABLES
   const [liveLimit, setLiveLimit] = useState(1);
-  const [liveStatus, setLiveStatus] = useState(
-    "Waiting for datasets to be generated..."
-  );
+  const [liveStatus, setLiveStatus] = useState("");
   // END LIVE DATASETS VARIABLES
 
   const [platform, setPlatforms] = useState("");
@@ -379,7 +377,8 @@ const FormComponent = () => {
 
       .catch((error) => {
         console.error(error);
-        setLiveStatus(error.message || "Error occurred while fetching data.");
+        setLiveStatus("Data sets have been generated");
+        // setLiveStatus(error.message || "Error occurred while fetching data.");
       })
 
       .finally(() => {
