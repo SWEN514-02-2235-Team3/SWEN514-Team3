@@ -186,7 +186,7 @@ const FormComponent = () => {
           // Construct the status string
           if (!comments_analyzed) {
             statusString = <Box>
-              <Typography>Could not find any comments across {videos_analyzed} analyzed videos ({videos_found} total found).</Typography>
+              <Typography>Could not find any comments across {videos_found} videos.</Typography>
               {(videos_analyzed == 0 && videos_found > 0) && 
                 <Typography>This is because {videos_found} have already been analyzed.</Typography>
                 }
