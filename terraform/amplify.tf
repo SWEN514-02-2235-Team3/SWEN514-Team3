@@ -31,6 +31,8 @@ resource "aws_amplify_app" "sa-app" {
   environment_variables = {
     ENV = "dev"
     REACT_APP_API_URL = "${aws_api_gateway_deployment.sa_api_gateway_deployment.invoke_url}" # API Gateway URL
+    REACT_APP_COGNITO_CLIENT_ID= "${aws_cognito_user_pool_client.main.id}"
+    REACT_APP_COGNITO_USER_POOL_ID= "${aws_cognito_user_pool.main.id}"
   }
   depends_on = [ aws_lambda_permission.lambda_s3_trigger_source, aws_lambda_function.lambda_s3_datasets, aws_dynamodb_table.db_sa_data, aws_s3_bucket.s3_bucket_sentianalysis ]
 }
