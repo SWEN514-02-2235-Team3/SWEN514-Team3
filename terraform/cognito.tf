@@ -40,4 +40,28 @@ resource "aws_cognito_user_pool_client" "main" {
   generate_secret                       = false
   explicit_auth_flows                  = ["ALLOW_USER_SRP_AUTH", "ALLOW_REFRESH_TOKEN_AUTH"]
   supported_identity_providers         = ["COGNITO"]
+
 }
+
+
+data "template_file" "env_template" {
+  template = file("env_template.tpl")
+
+  vars = {
+    api_gateway_url      = aws_api_gateway_deployment.sa_api_gateway_deployment.invoke_url
+    cognito_user_pool_id = aws_cognito_user_pool.main.id
+    cognito_client_id    = aws_cognito_user_pool_client.main.id
+  }
+}
+
+resource "local_file" "env_file" {
+  content  = data.template_file.env_template.rendered  
+  filename = "../frontend/.env"
+  depends_on = [ data.template_file.env_template, aws_api_gateway_deployment.sa_api_gateway_deployment ]
+
+}
+# resource "local_file" "env_file" {
+#   content  = data.template_file.env_template.rendered
+#   filename = "../frontend/.env"
+#   depends_on = [ data.template_file.env_template, aws_api_gateway_deployment.sa_api_gateway_deployment ]
+# }
