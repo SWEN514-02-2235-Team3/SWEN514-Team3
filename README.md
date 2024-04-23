@@ -6,7 +6,8 @@ This project analyzes sentiments of comments from multiple sources (YouTube, Red
 ------------------------------------------------------------------
 
 # Cloud Architecture Diagram
-![Uploading AWS_Architecture_diagram.png…]()
+![AWS_Architecture_diagram](https://github.com/SWEN514-02-2235-Team3/SWEN514-Team3/assets/67706639/95c70ac2-2728-48f2-87ea-d7628a9d4a58)
+
 
 
 # AWS Services being deployed
